@@ -43,4 +43,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         request.getSession().setAttribute("employee", emp.getId());
         return R.success(emp);
     }
+
+    @Override
+    public R<String> logout(HttpServletRequest request) {
+        //清理Session中保存的当前登录员工的id
+        request.getSession().removeAttribute("employee");
+        return R.success("退出成功");
+    }
 }

@@ -164,6 +164,8 @@
         },
         computed: {},
         created() {
+          //钩子函数，在Vue对象创建时就执行
+          //取出浏览器的localStorage中为userInfo的key对应的value
           const userInfo = window.localStorage.getItem('userInfo')
           if (userInfo) {
             this.userInfo = JSON.parse(userInfo)
@@ -178,9 +180,10 @@
           window.menuHandle = this.menuHandle
         },
         methods: {
-          logout() {
+          logout() {//点击退出按钮后执行的方法
             logoutApi().then((res)=>{
               if(res.code === 1){
+                //移除掉浏览器的localStorage中为userInfo的key对应的value，并跳转回后台登录界面
                 localStorage.removeItem('userInfo')
                 window.location.href = '/backend/page/login/login.html'
               }

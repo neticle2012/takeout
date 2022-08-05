@@ -6,7 +6,7 @@ function loginApi(data) {
   })
 }
 
-function logoutApi(){
+function logoutApi(){//退出后台，点击退出按钮后发送post请求到虚拟路径/employee/logout
   return $axios({
     'url': '/employee/logout',
     'method': 'post',

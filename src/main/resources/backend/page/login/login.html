@@ -101,6 +101,8 @@
               this.loading = true
               let res = await loginApi(this.loginForm)
               if (String(res.code) === '1') {// 1表示登录成功
+                //以userInfo为key，返回data转成的json对象为value，存储到浏览器中
+                //可以通过浏览器F12选择application进行查看
                 localStorage.setItem('userInfo',JSON.stringify(res.data))
                 window.location.href= '/backend/index.html'
               } else {
