@@ -1,6 +1,5 @@
 package org.neticle.takeout.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
@@ -16,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
  * @author Faruku123
  * @version 1.0
  */
-@Slf4j
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -37,5 +35,13 @@ public class EmployeeController {
     @PostMapping("/logout")
     public R<String> logout(HttpServletRequest request){
         return employeeService.logout(request);
+    }
+
+    /**
+     * 新增员工
+     */
+    @PostMapping
+    public R<String> saveEmp(HttpServletRequest request, @RequestBody Employee employee){
+        return employeeService.saveEmp(request, employee);
     }
 }

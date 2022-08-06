@@ -16,7 +16,7 @@ function enableOrDisableEmployee (params) {
 }
 
 // 新增---添加员工
-function addEmployee (params) {
+function addEmployee (params) {//在添加员工界面点击保存按钮后发送post请求到虚拟路径/employee
   return $axios({
     url: '/employee',
     method: 'post',

@@ -153,8 +153,8 @@
               }
             })
           },
-          submitForm (formName, st) {
-            this.$refs[formName].validate((valid) => {
+          submitForm (formName, st) {//点击保存按钮触发此方法
+            this.$refs[formName].validate((valid) => {//前端数据校验
               if (valid) {
                 if (this.actionType === 'add') {
                   const params = {
@@ -162,6 +162,7 @@
                     sex: this.ruleForm.sex === '女' ? '0' : '1'
                   }
                   addEmployee(params).then(res => {
+                    //这里也是由于前端拦截器返回的res.data，所以无需在调用res.data.code
                     if (res.code === 1) {
                       this.$message.success('员工添加成功！')
                       if (!st) {
@@ -178,6 +179,7 @@
                         }
                       }
                     } else {
+                      //打印后端封装的异常信息
                       this.$message.error(res.msg || '操作失败')
                     }
                   }).catch(err => {

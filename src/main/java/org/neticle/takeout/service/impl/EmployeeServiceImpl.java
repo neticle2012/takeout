@@ -2,6 +2,7 @@ package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.mapper.EmployeeMapper;
 import org.neticle.takeout.pojo.Employee;
@@ -10,11 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 
 /**
  * @author Faruku123
  * @version 1.0
  */
+@Slf4j
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         implements EmployeeService{
@@ -49,5 +52,20 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         //清理Session中保存的当前登录员工的id
         request.getSession().removeAttribute("employee");
         return R.success("退出成功");
+    }
+
+    @Override
+    public R<String> saveEmp(HttpServletRequest request, Employee employee) {
+        log.info("新增员工，员工信息: {}", employee.toString());
+        //设置初始密码123456，需要进行md5加密处理
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+        //获取当前登录用户的id
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        employee.setCreateUser(empId);
+        employee.setUpdateUser(empId);
+        this.save(employee);
+        return R.success("新增员工成功");
     }
 }
