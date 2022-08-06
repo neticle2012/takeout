@@ -130,11 +130,11 @@
             }
           }
         },
-        created() {
+        created() {//钩子函数，在Vue对象创建后自动调用
           this.id = requestUrlParam('id')
-          this.actionType = this.id ? 'edit' : 'add'
+          this.actionType = this.id ? 'edit' : 'add' //this.id存在的是修改员工，不存在的是新增员工
           if (this.id) {
-            this.init()
+            this.init() //如果是修改员工，需要发送get请求根据员工id获取员工修改前的信息回显到页面上
           }
         },
         mounted() {
@@ -146,7 +146,7 @@
               if (String(res.code) === '1') {
                 console.log(res.data)
                 this.ruleForm = res.data
-                this.ruleForm.sex = res.data.sex === '0' ? '女' : '男'
+                this.ruleForm.sex = res.data.sex === '0' ? '女' : '男'//将性别从0/1转换为女/男
                 // this.ruleForm.password = ''
               } else {
                 this.$message.error(res.msg || '操作失败')

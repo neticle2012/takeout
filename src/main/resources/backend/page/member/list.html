@@ -156,7 +156,7 @@
             this.init();
           },
            // 添加
-          addMemberHandle (st) {//点击添加员工按钮触发此方法，跳转到页面/backend/page/member/add.html
+          addMemberHandle (st) {//点击添加员工或者修改员工按钮触发此方法，跳转到页面/backend/page/member/add.html
             if (st === 'add'){
               window.parent.menuHandle({//这里是将当前嵌入页面的父页面给做了跳转
                 id: '2',
@@ -164,7 +164,7 @@
                 name: '添加员工'
               },true)
             } else {
-              window.parent.menuHandle({
+              window.parent.menuHandle({//修改员工跳转页面时还会带上员工的id
                 id: '2',
                 url: '/backend/page/member/add.html?id='+st,
                 name: '修改员工'

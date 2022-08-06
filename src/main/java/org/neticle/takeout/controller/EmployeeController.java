@@ -58,4 +58,12 @@ public class EmployeeController {
     public R<String> updateEmp(HttpServletRequest request, @RequestBody Employee employee){
         return employeeService.updateEmp(request, employee);
     }
+
+    /**
+     * 根据id查询员工信息
+     */
+    @GetMapping("/{id}")
+    public R<Employee> getByEmpId(@PathVariable("id") Long id){
+        return employeeService.getByEmpId(id);
+    }
 }

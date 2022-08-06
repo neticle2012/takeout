@@ -34,7 +34,7 @@ function editEmployee (params) {
 }
 
 // 修改页面反查详情接口
-function queryEmployeeById (id) {
+function queryEmployeeById (id) {//在跳转到修改员工界面后发送get请求到虚拟路径/employee/要修改员工的id
   return $axios({
     url: `/employee/${id}`,
     method: 'get'

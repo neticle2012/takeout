@@ -96,4 +96,14 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         this.updateById(employee);
         return R.success("员工信息修改成功");
     }
+
+    @Override
+    public R<Employee> getByEmpId(Long id) {
+        log.info("根据id查询员工信息...");
+        Employee employee = this.getById(id);
+        if (employee != null){
+            return R.success(employee);
+        }
+        return R.error("没有查询到员工信息");
+    }
 }
