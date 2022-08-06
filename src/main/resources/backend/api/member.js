@@ -1,4 +1,4 @@
-function getMemberList (params) {
+function getMemberList (params) {//在分页查询时发送get请求到虚拟路径/employee/page
   return $axios({
     url: '/employee/page',
     method: 'get',

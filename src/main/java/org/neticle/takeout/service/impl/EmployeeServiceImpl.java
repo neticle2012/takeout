@@ -1,8 +1,10 @@
 package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.mapper.EmployeeMapper;
 import org.neticle.takeout.pojo.Employee;
@@ -67,5 +69,22 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         employee.setUpdateUser(empId);
         this.save(employee);
         return R.success("新增员工成功");
+    }
+
+    @Override
+    public R<Page<Employee>> getPage(int page, int pageSize, String name) {
+        log.info("page = {}, pageSize = {}, name = {}", page, pageSize, name);
+        //构造分页构造器
+        Page<Employee> pageInfo = new Page<>(page, pageSize);
+        //构造条件构造器
+        //SELECT * FROM employee WHERE name LIKE %name% ORDER BY update_time DESC
+        //LIMIT (page - 1)*pageSize ,pageSize
+        LambdaQueryWrapper<Employee> lqw = new LambdaQueryWrapper<>();
+        //添加过滤条件
+        lqw.like(StringUtils.isNotEmpty(name), Employee::getName, name);
+        //添加排序条件
+        lqw.orderByDesc(Employee::getUpdateTime);
+        this.page(pageInfo, lqw);//执行查询
+        return R.success(pageInfo);
     }
 }

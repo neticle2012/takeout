@@ -60,6 +60,7 @@
         ></el-table-column>
         <el-table-column label="账号状态">
           <template slot-scope="scope">
+            <!--status=0，显示已禁用，status=1，显示正常-->
             {{ String(scope.row.status) === '0' ? '已禁用' : '正常' }}
           </template>
         </el-table-column>
@@ -92,7 +93,7 @@
       </el-table>
       <el-pagination
         class="pageList"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="[2, 4, 6, 8]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="counts"
@@ -118,14 +119,14 @@
              input: '',
              counts: 0,
              page: 1,
-             pageSize: 10,
+             pageSize: 2,
              tableData : [],
              id : '',
              status : '',
           }
         },
         computed: {},
-        created() {
+        created() {//钩子函数，Vue对象创建后调用
           this.init()
           this.user = JSON.parse(localStorage.getItem('userInfo')).username
         },
@@ -140,6 +141,7 @@
             }
             await getMemberList(params).then(res => {
               if (String(res.code) === '1') {
+                //取出返回的R对象的data属性中的的records属性和total属性进行分页展示
                 this.tableData = res.data.records || []
                 this.counts = res.data.total
               }
@@ -147,7 +149,7 @@
               this.$message.error('请求出错了：' + err)
             })
           },
-          handleQuery() {
+          handleQuery() {//点击查询按钮后触发此方法
             this.page = 1;
             this.init();
           },
@@ -191,7 +193,7 @@
             this.pageSize = val
             this.init()
           },
-          handleCurrentChange (val) {
+          handleCurrentChange (val) {//翻页时触发此方法
             this.page = val
             this.init()
           }
