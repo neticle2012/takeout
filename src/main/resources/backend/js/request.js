@@ -42,14 +42,15 @@
       Promise.reject(error)
   })
 
-  // 响应拦截器
+  // 响应拦截器（前端的拦截器）
   service.interceptors.response.use(res => {
-      if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
+      // 如果响应数据（res.data才是封装为json字符串的R对象）满足以下条件，则直接跳转回登录页面
+      if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {
         console.log('---/backend/page/login/login.html---')
         localStorage.removeItem('userInfo')
         window.top.location.href = '/backend/page/login/login.html'
       } else {
-        return res.data
+        return res.data //注意！！！这里前端拦截器放行后直接返回的res.data！！！
       }
     },
     error => {
