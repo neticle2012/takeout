@@ -50,4 +50,12 @@ public class EmployeeController {
     public R<Page<Employee>> getPage(int page, int pageSize, String name){
         return employeeService.getPage(page, pageSize, name);
     }
+
+    /**
+     * 根据id修改员工信息
+     */
+    @PutMapping
+    public R<String> updateEmp(HttpServletRequest request, @RequestBody Employee employee){
+        return employeeService.updateEmp(request, employee);
+    }
 }

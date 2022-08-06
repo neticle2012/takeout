@@ -1,4 +1,4 @@
-function getMemberList (params) {//在分页查询时发送get请求到虚拟路径/employee/page
+function getMemberList (params) {//在后台界面分页查询时发送get请求到虚拟路径/employee/page
   return $axios({
     url: '/employee/page',
     method: 'get',
@@ -7,7 +7,7 @@ function getMemberList (params) {//在分页查询时发送get请求到虚拟路
 }
 
 // 修改---启用禁用接口
-function enableOrDisableEmployee (params) {
+function enableOrDisableEmployee (params) {//在后台界面点击启用/禁用按钮后发送put请求到虚拟路径/employee
   return $axios({
     url: '/employee',
     method: 'put',

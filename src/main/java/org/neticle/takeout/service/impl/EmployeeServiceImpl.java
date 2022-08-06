@@ -87,4 +87,13 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         this.page(pageInfo, lqw);//执行查询
         return R.success(pageInfo);
     }
+
+    @Override
+    public R<String> updateEmp(HttpServletRequest request, Employee employee) {
+        log.info(employee.toString());
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+        this.updateById(employee);
+        return R.success("员工信息修改成功");
+    }
 }
