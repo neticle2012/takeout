@@ -13,4 +13,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface CategoryService extends IService<Category> {
     R<String> saveCatory(@RequestBody Category category);
     R<Page<Category>> getPage(int page, int pageSize);
+    R<String> deleteCategory(Long id);
 }

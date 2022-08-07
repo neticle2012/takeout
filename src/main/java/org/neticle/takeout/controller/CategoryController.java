@@ -33,4 +33,12 @@ public class CategoryController {
     public R<Page<Category>> getPage(int page, int pageSize){
         return categoryService.getPage(page, pageSize);
     }
+
+    /**
+     * 根据id删除分类，删除之前需要进行判断
+     */
+    @DeleteMapping
+    public R<String> deleteCategory(Long id){
+        return categoryService.deleteCategory(id);
+    }
 }

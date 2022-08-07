@@ -4,10 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.mapper.CategoryMapper;
 import org.neticle.takeout.pojo.Category;
+import org.neticle.takeout.pojo.Dish;
+import org.neticle.takeout.pojo.Setmeal;
 import org.neticle.takeout.service.CategoryService;
+import org.neticle.takeout.service.DishService;
+import org.neticle.takeout.service.SetmealService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +24,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         implements CategoryService {
+    @Autowired
+    private DishService dishService;
+    @Autowired
+    private SetmealService setmealService;
+
     @Override
     public R<String> saveCatory(Category category) {
         log.info("category:{}", category);
@@ -36,5 +47,31 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         lqw.orderByAsc(Category::getSort);
         this.page(pageInfo, lqw);//执行查询
         return R.success(pageInfo);
+    }
+
+    @Override
+    public R<String> deleteCategory(Long id) {
+        log.info("删除分类，id = {}", id);
+        //查询当前分类是否关联了菜品，如果已经关联，抛出一个业务异常
+        //构造条件构造器
+        //SELECT COUNT(*) FROM dish WHERE category_id = id
+        LambdaQueryWrapper<Dish> dishLqw = new LambdaQueryWrapper<>();
+        dishLqw.eq(Dish::getCategoryId, id);
+        if (dishService.count(dishLqw) > 0) {
+            //已经关联菜品，抛出一个业务异常
+            throw new CustomException("当前分类下关联了菜品，不能删除");
+        }
+        //查询当前分类是否关联了套餐，如果已经关联，抛出一个业务异常
+        //构造条件构造器
+        //SELECT COUNT(*) FROM setmeal WHERE category_id = id
+        LambdaQueryWrapper<Setmeal> setmealLqw = new LambdaQueryWrapper<>();
+        setmealLqw.eq(Setmeal::getCategoryId, id);
+        if (setmealService.count(setmealLqw) > 0) {
+            //已经关联套餐，抛出一个业务异常
+            throw new CustomException("当前分类下关联了套餐，不能删除");
+        }
+        //正常删除分类
+        this.removeById(id);
+        return R.success("分类信息删除成功");
     }
 }
