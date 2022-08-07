@@ -41,4 +41,12 @@ public class CategoryController {
     public R<String> deleteCategory(Long id){
         return categoryService.deleteCategory(id);
     }
+
+    /**
+     * 根据id修改分类信息
+     */
+    @PutMapping
+    public R<String> updateCategory(@RequestBody Category category){
+        return categoryService.updateCategory(category);
+    }
 }

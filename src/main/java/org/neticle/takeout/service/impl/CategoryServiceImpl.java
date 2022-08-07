@@ -74,4 +74,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         this.removeById(id);
         return R.success("分类信息删除成功");
     }
+
+    @Override
+    public R<String> updateCategory(Category category) {
+        log.info("修改分类信息: {}", category);
+        this.updateById(category);
+        return R.success("修改分类信息成功");
+    }
 }

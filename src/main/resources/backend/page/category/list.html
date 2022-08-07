@@ -107,6 +107,7 @@
         label-width="100px"
       >
         <el-form-item label="分类名称：">
+          <!--该输入框与模型数据classData.name进行了双向绑定-->
           <el-input
             v-model="classData.name"
             placeholder="请输入分类名称"
@@ -205,7 +206,7 @@
             this.classData.sort = ''
             this.classData.dialogVisible = true
           },
-          editHandle(dat) {
+          editHandle(dat) {//点击修改按钮触发此方法
             this.classData.title = '修改分类'
             this.action = 'edit'
             this.classData.name = dat.name
