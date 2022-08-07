@@ -34,7 +34,7 @@ const editCategory = (params) => {
 }
 
 // 新增接口
-const addCategory = (params) => {
+const addCategory = (params) => {//在后台分类管理界面新增菜品/套餐分类后发送post请求到虚拟路径/category
   return $axios({
     url: '/category',
     method: 'post',

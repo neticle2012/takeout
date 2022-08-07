@@ -236,7 +236,7 @@
             })
           },
           //数据提交
-          submitForm(st) {
+          submitForm(st) {//新增菜品/套餐分类后点击确认按钮时触发此方法
               const classData = this.classData
               const valid = (classData.name === 0 ||classData.name)  && (classData.sort === 0 || classData.sort)
               if (this.action === 'add') {
