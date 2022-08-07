@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
-        implements EmployeeService{
+        implements EmployeeService {
     @Override
     public R<Employee> login(HttpServletRequest request, Employee employee) {
         //1、将页面提交的密码进行md5加密处理
@@ -33,15 +33,15 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         LambdaQueryWrapper<Employee> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Employee::getUsername, employee.getUsername());
         Employee emp = this.getOne(lqw);
-        if (emp == null){
+        if (emp == null) {
             return R.error("登录失败");
         }
         //3、比对密码，如果不一致则返回失败结果
-        if (!emp.getPassword().equals(password)){
+        if (!emp.getPassword().equals(password)) {
             return R.error("登录失败");
         }
         //4、查看员工状态，如果已禁用状态，则返回员工已禁用结果
-        if (emp.getStatus() == 0){
+        if (emp.getStatus() == 0) {
             return R.error("账号已禁用");
         }
         //5、登录成功，将用户id存入Session并返回成功结果
@@ -61,12 +61,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         log.info("新增员工，员工信息: {}", employee.toString());
         //设置初始密码123456，需要进行md5加密处理
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        //获取当前登录用户的id
-        Long empId = (Long) request.getSession().getAttribute("employee");
-        employee.setCreateUser(empId);
-        employee.setUpdateUser(empId);
         this.save(employee);
         return R.success("新增员工成功");
     }
@@ -91,8 +85,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     @Override
     public R<String> updateEmp(HttpServletRequest request, Employee employee) {
         log.info(employee.toString());
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser((Long) request.getSession().getAttribute("employee"));
+        log.info("线程id = {}", Thread.currentThread().getId());
         this.updateById(employee);
         return R.success("员工信息修改成功");
     }
@@ -101,7 +94,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     public R<Employee> getByEmpId(Long id) {
         log.info("根据id查询员工信息...");
         Employee employee = this.getById(id);
-        if (employee != null){
+        if (employee != null) {
             return R.success(employee);
         }
         return R.error("没有查询到员工信息");
