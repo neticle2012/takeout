@@ -20,3 +20,6 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID  # 设置统一的主键生成策略
+
+takeout:
+  path: E:\hspeduIOFiles\takeout\ # 设置文件上传后的保存路径

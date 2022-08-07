@@ -33,7 +33,8 @@ public class LoginCheckFilter implements Filter {
         log.info("拦截到请求: {}", requestURI);
         // 定义不需要处理的请求路径：servlet请求（/employee/login、employee/logout）
         // 静态资源请求（/backend/**、/front/**）
-        String[] urls = {"/employee/login", "employee/logout", "/backend/**", "/front/**"};
+        String[] urls = {"/employee/login", "employee/logout", "/backend/**", "/front/**",
+                "/common/**"};
         // 2、判断本次请求是否需要处理，如果不需要处理，则直接放行
         boolean check = check(urls, requestURI);
         if (check){
