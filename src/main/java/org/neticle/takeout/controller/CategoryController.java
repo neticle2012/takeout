@@ -1,13 +1,11 @@
 package org.neticle.takeout.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.pojo.Category;
 import org.neticle.takeout.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Faruku123
@@ -26,5 +24,13 @@ public class CategoryController {
     @PostMapping
     public R<String> saveCatory(@RequestBody Category category){
         return categoryService.saveCatory(category);
+    }
+
+    /**
+     * 分页查询
+     */
+    @GetMapping("/page")
+    public R<Page<Category>> getPage(int page, int pageSize){
+        return categoryService.getPage(page, pageSize);
     }
 }

@@ -1,5 +1,5 @@
 // 查询列表接口
-const getCategoryPage = (params) => {
+const getCategoryPage = (params) => {//在分页查询时发送get请求到虚拟路径/category/page
   return $axios({
     url: '/category/page',
     method: 'get',

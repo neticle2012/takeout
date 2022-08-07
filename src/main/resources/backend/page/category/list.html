@@ -45,6 +45,7 @@
           label="分类类型"
         >
           <template slot-scope="scope">
+            <!--type=1，显示菜品分类，type=2，显示套餐分类-->
             <span>{{ scope.row.type == '1' ? '菜品分类': '套餐分类' }}</span>
           </template>
         </el-table-column>
@@ -87,7 +88,7 @@
       </el-table>
       <el-pagination
         class="pageList"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="[2, 4, 6, 8]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="counts"
@@ -155,7 +156,7 @@
             action: '',
             counts: 0,
             page: 1,
-            pageSize: 10,
+            pageSize: 2,
             tableData: [],
             type :'',
             classData: {
@@ -168,7 +169,7 @@
           }
         },
         computed: {},
-        created() {
+        created() {//钩子函数，Vue对象创建后自动调用
           this.init()
         },
         mounted() {
