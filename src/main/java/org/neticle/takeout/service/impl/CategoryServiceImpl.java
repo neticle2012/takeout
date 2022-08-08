@@ -16,6 +16,8 @@ import org.neticle.takeout.service.SetmealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author Faruku123
  * @version 1.0
@@ -80,5 +82,17 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
         log.info("修改分类信息: {}", category);
         this.updateById(category);
         return R.success("修改分类信息成功");
+    }
+
+    @Override
+    public R<List<Category>> listCategory(Category category) {
+        //构造条件构造器
+        //SELECT * FROM category WHERE type = category.type
+        // ORDER BY sort ASC, update_time DESC
+        LambdaQueryWrapper<Category> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(category.getType() != null, Category::getType, category.getType());
+        lqw.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = this.list(lqw);
+        return R.success(list);
     }
 }

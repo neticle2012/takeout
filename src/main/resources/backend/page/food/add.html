@@ -320,7 +320,7 @@
             }
           }
         },
-        created() {
+        created() {//钩子函数，Vue对象创建完成后自动调用
           this.getDishList()
           // 口味临时数据
           this.getFlavorListHand()
@@ -388,7 +388,7 @@
           },
 
           // 获取菜品分类
-          getDishList () {
+          getDishList () {//type=1为菜品分类，type=2为套餐分类
             getCategoryList({ 'type': 1 }).then(res => {
               if (res.code === 1) {
                 this.dishList = res.data
@@ -449,7 +449,7 @@
                 let params = {...this.ruleForm}
                 // params.flavors = this.dishFlavors
                 params.status = this.ruleForm ? 1 : 0
-                params.price *= 100
+                params.price *= 100 //价格以分的形式存储在数据库中
                 params.categoryId = this.ruleForm.categoryId
                 params.flavors = this.dishFlavors.map(obj => ({ ...obj, value: JSON.stringify(obj.value) }))
                 delete params.dishFlavors
@@ -505,11 +505,12 @@
             })
           },
 
-          handleAvatarSuccess (response, file, fileList) {
+          handleAvatarSuccess (response, file, fileList) {//上传图片成功后调用此方法
             // 拼接down接口预览
             if(response.code === 0 && response.msg === '未登录'){
               window.top.location.href = '/backend/page/login/login.html'
             }else{
+              //response.data即为后端返回的图片名称
               this.imageUrl = `/common/download?name=${response.data}`
               this.ruleForm.image = response.data
             }

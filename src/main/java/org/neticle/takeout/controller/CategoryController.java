@@ -7,6 +7,8 @@ import org.neticle.takeout.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Faruku123
  * @version 1.0
@@ -48,5 +50,14 @@ public class CategoryController {
     @PutMapping
     public R<String> updateCategory(@RequestBody Category category){
         return categoryService.updateCategory(category);
+    }
+
+    /**
+     * 根据条件查询分类数据
+     */
+    @GetMapping("/list")
+    //这里通过pojo获取请求参数，若浏览器传输的请求参数的参数名和实体类中的属性名一致，那么请求参数就会为此属性赋值
+    public R<List<Category>> listCategory(Category category){
+        return categoryService.listCategory(category);
     }
 }

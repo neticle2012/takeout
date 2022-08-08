@@ -26,7 +26,7 @@ const editDish = (params) => {
 }
 
 // 新增接口
-const addDish = (params) => {
+const addDish = (params) => {//在后台添加菜品后发送post到虚拟路径/dish
   return $axios({
     url: '/dish',
     method: 'post',
@@ -43,7 +43,7 @@ const queryDishById = (id) => {
 }
 
 // 获取菜品分类列表
-const getCategoryList = (params) => {
+const getCategoryList = (params) => {//在后台菜品管理界面点击添加菜品时发送get请求到虚拟路径/category/list
   return $axios({
     url: '/category/list',
     method: 'get',
