@@ -1,5 +1,5 @@
 // 查询列表数据
-const getSetmealPage = (params) => {
+const getSetmealPage = (params) => {//在后台套餐管理界面进行分页查询时发送get请求到虚拟路径/setmeal/page
   return $axios({
     url: '/setmeal/page',
     method: 'get',

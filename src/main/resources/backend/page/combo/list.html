@@ -124,7 +124,7 @@
       </el-table>
       <el-pagination
         class="pageList"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="[2, 4, 6, 8]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="counts"
@@ -150,14 +150,14 @@
              input: '',
              counts: 0,
              page: 1,
-             pageSize: 10,
+             pageSize: 2,
              tableData : [],
              dishState : '',
              checkList: []
           }
         },
         computed: {},
-        created() {
+        created() {//钩子函数，Vue对象创建时自动调用
           this.init()
         },
         mounted() {
