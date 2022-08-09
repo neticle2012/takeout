@@ -1,5 +1,5 @@
 // 查询列表接口
-const getDishPage = (params) => {
+const getDishPage = (params) => {//对菜品进行分页查询时发送get请求到虚拟路径/dish/page
   return $axios({
     url: '/dish/page',
     method: 'get',
