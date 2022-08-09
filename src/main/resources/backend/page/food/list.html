@@ -198,9 +198,9 @@
           },
 
           // 删除
-          deleteHandle (type, id) {
-            if (type === '批量' && id === null) {
-              if (this.checkList.length === 0) {
+          deleteHandle (type, id) {//点击单个餐品的删除按钮，或者选中多个菜品后点击删除按钮时触发
+            if (type === '批量' && id === null) {//批量删除
+              if (this.checkList.length === 0) {//没有在左侧框中勾选任何菜品
                 return this.$message.error('请选择删除对象')
               }
             }

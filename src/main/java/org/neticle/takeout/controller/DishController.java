@@ -61,4 +61,12 @@ public class DishController {
                                       @RequestParam("ids") List<Long> ids){
         return dishService.updateDishStatus(status, ids);
     }
+
+    /**
+     * 删除和批量删除菜品
+     */
+    @DeleteMapping
+    public R<String> deleteDish(@RequestParam("ids") List<Long> ids){
+        return dishService.deleteDishWithFlavor(ids);
+    }
 }

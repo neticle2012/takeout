@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.mapper.DishMapper;
@@ -146,5 +147,32 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         dish.setStatus(status);
         this.update(dish, luw);
         return R.success("售卖状态修改成功");
+    }
+
+    /**
+     * 批量删除菜品，同时删除菜品对应的口味
+     * 如果某个菜品正在起售，则整个批量删除失败
+     * TODO 这里还需要进行菜品是否在套餐中的判断
+     */
+    @Override
+    @Transactional
+    public R<String> deleteDishWithFlavor(List<Long> ids) {
+        log.info("ids:{}", ids);
+        //查询当前菜品集合中是否存在正在起售的菜品，如果存在，则批量删除失败
+        //SELECT * FROM dish WHERE id IN (ids)
+        List<Dish> dishes = this.listByIds(ids);
+        for (Dish dish : dishes) {
+            if (dish.getStatus() == 1){
+                throw new CustomException("存在正在售卖的菜品，无法删除");
+            }
+        }
+        //DELETE FROM dish WHERE id IN (ids)
+        this.removeBatchByIds(ids);
+        //既然已经成功删除了菜品，那么对应的口味直接删除即可
+        //DELETE FROM dish_flavor WHERE dish_id IN (ids)
+        LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
+        lqw.in(ids != null, DishFlavor::getDishId, ids);
+        dishFlavorService.remove(lqw);
+        return R.success("菜品删除成功");
     }
 }

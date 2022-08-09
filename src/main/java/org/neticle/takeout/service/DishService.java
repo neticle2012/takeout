@@ -18,4 +18,5 @@ public interface DishService extends IService<Dish> {
     R<DishDto> getDishWithFlavor(Long id);
     R<String> updateDishWithFlavor(DishDto dishDto);
     R<String> updateDishStatus(int status, List<Long> ids);
+    R<String> deleteDishWithFlavor(List<Long> ids);
 }

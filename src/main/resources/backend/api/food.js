@@ -8,7 +8,7 @@ const getDishPage = (params) => {//对菜品进行分页查询时发送get请求
 }
 
 // 删除接口
-const deleteDish = (ids) => {
+const deleteDish = (ids) => {//在后台菜品管理界面点击删除或者批量删除时发送delete请求到虚拟路径/dish
   return $axios({
     url: '/dish',
     method: 'delete',
