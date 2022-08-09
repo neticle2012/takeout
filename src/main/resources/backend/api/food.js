@@ -73,6 +73,7 @@ const commonDownload = (params) => {
 }
 
 // 起售停售---批量起售停售接口
+//在后台菜品管理界面点击起售/停售或者批量起售/停售时发送post请求到虚拟路径/dish/status/${params.status}
 const dishStatusByStatus = (params) => {
   return $axios({
     url: `/dish/status/${params.status}`,

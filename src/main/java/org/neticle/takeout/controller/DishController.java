@@ -8,6 +8,8 @@ import org.neticle.takeout.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Faruku123
  * @version 1.0
@@ -49,5 +51,14 @@ public class DishController {
     @PutMapping
     public R<String> updateDish(@RequestBody DishDto dishDto){
         return dishService.updateDishWithFlavor(dishDto);
+    }
+
+    /**
+     * 起售/停售和批量起售/停售，批量修改菜品的状态信息
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateDishStatus(@PathVariable("status") int status,
+                                      @RequestParam("ids") List<Long> ids){
+        return dishService.updateDishStatus(status, ids);
     }
 }

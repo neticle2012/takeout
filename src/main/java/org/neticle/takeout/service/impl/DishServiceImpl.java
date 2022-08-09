@@ -1,6 +1,7 @@
 package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,5 +132,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         }).collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
         return R.success("修改菜品成功");
+    }
+
+    @Override
+    public R<String> updateDishStatus(int status, List<Long> ids) {
+        log.info("status: {}", status);
+        log.info("ids: {}", ids);
+        //UPDATE dish SET `status` = status WHERE id IN (ids);
+        LambdaUpdateWrapper<Dish> luw = new LambdaUpdateWrapper<>();
+        luw.in(ids != null, Dish::getId, ids);
+        //注意：这里不能使用luw.set(Dish::getStatus, status)，因为公共字段update_time等也需要更新
+        Dish dish = new Dish();
+        dish.setStatus(status);
+        this.update(dish, luw);
+        return R.success("售卖状态修改成功");
     }
 }

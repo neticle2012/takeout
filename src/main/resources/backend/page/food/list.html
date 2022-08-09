@@ -148,7 +148,7 @@
              pageSize: 10,
              tableData : [],
              dishState : '',
-             checkList: []
+             checkList: [] //管理左侧框选中的菜品
           }
         },
         computed: {},
@@ -222,16 +222,16 @@
           },
 
           //状态更改
-          statusHandle (row) {
+          statusHandle (row) {//点击单个菜品的起售/停售按钮，或者选中多个菜品后点击批量起售/停售按钮时触发
             let params = {}
-            if (typeof row === 'string' ) {
-              if (this.checkList.length === 0) {
+            if (typeof row === 'string' ) {//批量起售/停售
+              if (this.checkList.length === 0) {//没有在左侧框中勾选任何菜品
                 this.$message.error('批量操作，请先勾选操作菜品！')
                 return false
               }
               params.id = this.checkList.join(',')
               params.status = row
-            } else {
+            } else {//单个菜品的起售/停售
               params.id = row.id
               params.status = row.status ? '0' : '1'
             }
