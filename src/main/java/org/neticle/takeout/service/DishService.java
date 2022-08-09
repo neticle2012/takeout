@@ -13,4 +13,6 @@ import org.neticle.takeout.pojo.Dish;
 public interface DishService extends IService<Dish> {
     R<String> saveDishWithFlavor(DishDto dishDto);
     R<Page<DishDto>> getPage(int page, int pageSize, String name);
+    R<DishDto> getDishWithFlavor(Long id);
+    R<String> updateDishWithFlavor(DishDto dishDto);
 }

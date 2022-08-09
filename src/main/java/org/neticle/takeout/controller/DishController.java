@@ -34,4 +34,20 @@ public class DishController {
     public R<Page<DishDto>> getPage(int page, int pageSize, String name){
         return dishService.getPage(page, pageSize, name);
     }
+
+    /**
+     * 根据id查询菜品信息和对应的口味信息
+     */
+    @GetMapping("/{id}")
+    public R<DishDto> getDish(@PathVariable("id") Long id){
+        return dishService.getDishWithFlavor(id);
+    }
+
+    /**
+     * 修改菜品
+     */
+    @PutMapping
+    public R<String> updateDish(@RequestBody DishDto dishDto){
+        return dishService.updateDishWithFlavor(dishDto);
+    }
 }

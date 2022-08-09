@@ -85,4 +85,50 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         pageInfoDto.setRecords(dtoList);
         return R.success(pageInfoDto);
     }
+
+    /**
+     * 根据id查询菜品信息和对应的口味信息
+     */
+    @Override
+    public R<DishDto> getDishWithFlavor(Long id) {
+        //查询菜品基本信息，从dish表chaxun
+        Dish dish = this.getById(id);
+
+        //查询当前菜品对应的口味信息，从dish_flavor表查询
+        //SELECT * FROM dish_flavor WHERE dish_id = dish.id
+        LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DishFlavor::getDishId, dish.getId());
+        List<DishFlavor> flavors = dishFlavorService.list(lqw);
+
+        DishDto dishDto = new DishDto();
+        BeanUtils.copyProperties(dish, dishDto);
+        dishDto.setFlavors(flavors);
+        return R.success(dishDto);
+    }
+
+    /**
+     * 更新菜品信息，同时更新口味信息
+     */
+    @Override
+    @Transactional //两张表的更新要么同时成功，要么同时失败，需要使用事务控制
+    public R<String> updateDishWithFlavor(DishDto dishDto) {
+        Long dishId = dishDto.getId();//获取菜品id，为DishFlavor对象的dishId属性赋值
+
+        //更新dish表基本信息
+        this.updateById(dishDto);
+
+        //先清理当前菜品对应的口味数据 -> dish_flavor表的DELETE操作
+        //DELETE FROM dish_flavor WHERE dish_id = dishDto.id
+        LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DishFlavor::getDishId, dishId);
+        dishFlavorService.remove(lqw);
+        //然后添加当前提交过来的口味数据 -> dish_flavor表的INSERT操作
+        List<DishFlavor> flavors = dishDto.getFlavors();//菜品口味集合
+        flavors = flavors.stream().map((item) -> {
+            item.setDishId(dishId);
+            return item;
+        }).collect(Collectors.toList());
+        dishFlavorService.saveBatch(flavors);
+        return R.success("修改菜品成功");
+    }
 }
