@@ -42,8 +42,10 @@ const queryDishById = (id) => {
   })
 }
 
-// 获取菜品分类列表
-const getCategoryList = (params) => {//在后台菜品管理界面点击添加菜品时发送get请求到虚拟路径/category/list
+// 获取菜品/套餐分类列表
+//在后台菜品管理界面点击添加菜品时发送get请求到虚拟路径/category/list
+//在后台套餐管理界面点击添加套餐时发送get请求到虚拟路径/category/list
+const getCategoryList = (params) => {
   return $axios({
     url: '/category/list',
     method: 'get',
@@ -52,6 +54,7 @@ const getCategoryList = (params) => {//在后台菜品管理界面点击添加�
 }
 
 // 查菜品列表的接口
+//在后台套餐管理界面点击添加套餐，查询到菜品分类后发送get请求到虚拟路径/dish/list
 const queryDishList = (params) => {
   return $axios({
     url: '/dish/list',

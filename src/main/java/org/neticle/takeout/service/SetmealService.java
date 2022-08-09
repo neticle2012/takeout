@@ -1,6 +1,8 @@
 package org.neticle.takeout.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.pojo.Setmeal;
 
 /**
@@ -8,4 +10,5 @@ import org.neticle.takeout.pojo.Setmeal;
  * @version 1.0
  */
 public interface SetmealService extends IService<Setmeal> {
+    R<String> saveSetmealWithDish(SetmealDto setmealDto);
 }

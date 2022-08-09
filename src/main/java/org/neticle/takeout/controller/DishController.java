@@ -69,4 +69,12 @@ public class DishController {
     public R<String> deleteDish(@RequestParam("ids") List<Long> ids){
         return dishService.deleteDishWithFlavor(ids);
     }
+
+    /**
+     * 根据条件查询对应的菜品数据
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> listDish(Dish dish){
+        return dishService.listDish(dish);
+    }
 }

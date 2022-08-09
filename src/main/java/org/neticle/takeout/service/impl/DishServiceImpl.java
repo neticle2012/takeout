@@ -175,4 +175,16 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         dishFlavorService.remove(lqw);
         return R.success("菜品删除成功");
     }
+
+    @Override
+    public R<List<Dish>> listDish(Dish dish) {
+        //SELECT * FROM dish WHERE category_id = dish.categoryId AND status = 1
+        // ORDER BY sort ASC, update_time DESC
+        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        lqw.eq(Dish::getStatus, 1);//要求菜品必须是起售的，禁售菜品不显示
+        lqw.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> dishes = this.list(lqw);
+        return R.success(dishes);
+    }
 }

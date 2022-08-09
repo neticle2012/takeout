@@ -447,7 +447,7 @@
             this.checkedList = value
           }
         },
-        created() {
+        created() {//钩子函数，Vue对象创建时调用
           this.getDishTypeList()
           this.getDishType()
           this.id = requestUrlParam('id')
@@ -477,7 +477,7 @@
           seachHandle() {
             this.seachKey = this.value
           },
-          // 获取套餐分类
+          // 获取套餐分类，回显到下拉框中
           getDishTypeList() {
             getCategoryList({ type: 2, page: 1, pageSize: 1000 }).then((res) => {
               if (res.code === 1) {
@@ -638,6 +638,7 @@
           },
           // 获取套餐分类
           getDishType () {
+            //获取所有菜品分类，用于在添加套餐界面为套餐添加菜品
             getCategoryList({'type':1}).then(res => {
               if (res.code === 1) {
                 this.dishType = res.data
@@ -648,7 +649,7 @@
             })
           },
 
-          // 通过套餐ID获取菜品列表分类
+          // 通过菜品分类ID获取菜品列表分类
           getDishList (id) {
             queryDishList({categoryId: id}).then(res => {
               if (res.code === 1) {
