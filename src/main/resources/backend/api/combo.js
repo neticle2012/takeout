@@ -43,6 +43,7 @@ const querySetmealById = (id) => {//在后台套餐管理界面修改套餐时�
 }
 
 // 批量起售禁售
+//在后台套餐管理界面进行单个套餐的起售/停售和套餐批量起售/停售时，发送post请求到虚拟路径/setmeal/status/${params.status}
 const setmealStatusByStatus = (params) => {
   return $axios({
     url: `/setmeal/status/${params.status}`,

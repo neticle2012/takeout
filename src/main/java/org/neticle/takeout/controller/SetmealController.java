@@ -7,6 +7,8 @@ import org.neticle.takeout.service.SetmealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Faruku123
  * @version 1.0
@@ -48,5 +50,14 @@ public class SetmealController {
     @PutMapping
     public R<String> updateSetmeal(@RequestBody SetmealDto setmealDto){
         return setmealService.updateSetmealWithDish(setmealDto);
+    }
+
+    /**
+     * 起售/停售和批量起售/停售，批量修改套餐的状态信息
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateSetmealStatus(@PathVariable("status") int status,
+                                         @RequestParam("ids") List<Long> ids){
+        return setmealService.updateSetmealStatus(status, ids);
     }
 }

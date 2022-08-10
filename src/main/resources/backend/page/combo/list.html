@@ -227,7 +227,7 @@
           },
 
           //状态更改
-          statusHandle (row) {
+          statusHandle (row) {//点击单个套餐的起售/停售或者批量起售/停售时触发此方法
             let params = {}
             if (typeof row === 'string' ){
               if (this.checkList.length == 0){

@@ -9,12 +9,8 @@ import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.mapper.DishMapper;
-import org.neticle.takeout.pojo.Category;
-import org.neticle.takeout.pojo.Dish;
-import org.neticle.takeout.pojo.DishFlavor;
-import org.neticle.takeout.service.CategoryService;
-import org.neticle.takeout.service.DishFlavorService;
-import org.neticle.takeout.service.DishService;
+import org.neticle.takeout.pojo.*;
+import org.neticle.takeout.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -35,8 +31,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         implements DishService {
     @Autowired
     private DishFlavorService dishFlavorService;
-    @Autowired @Lazy //通过生成代理的方式解决构造循环依赖
+    @Autowired
+    @Lazy //通过生成代理的方式解决构造循环依赖
     private CategoryService categoryService;
+    @Autowired
+    private SetmealDishService setmealDishService;
+    @Autowired
+    @Lazy
+    private SetmealService setmealService;
 
     /**
      * 新增菜品，同时插入菜品对应的口味数据
@@ -79,7 +81,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             BeanUtils.copyProperties(item, dishDto);//将Dish对象的属性都拷贝到DishDto对象中
             Long categoryId = item.getCategoryId();//菜品的分类id
             Category category = categoryService.getById(categoryId);//根据分类id查询分类名称
-            if (category != null){
+            if (category != null) {
                 //将分类名称设置到DishDto对象的categoryName属性中
                 dishDto.setCategoryName(category.getName());
             }
@@ -149,6 +151,28 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         Dish dish = new Dish();
         dish.setStatus(status);
         this.update(dish, luw);
+
+        //如果一个菜品被停售，那么其关联的所有套餐都必须停售
+        if (status == 0) {
+            //SELECT setmeal_id FROM setmeal_dish WHERE dish_id in (ids)
+            LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
+            lqwSetmealDish.in(SetmealDish::getDishId, ids)
+                          .select(SetmealDish::getSetmealId);
+            List<SetmealDish> setmealDishes = setmealDishService.list(lqwSetmealDish);
+            List<Long> setmealIds = setmealDishes.stream()
+                                                 .map(SetmealDish::getSetmealId)
+                                                 .collect(Collectors.toList());
+            //UPDATE setmeal SET `status` = status WHERE id IN (setmealIds)
+            //注意：如果该菜品没有关联的套餐，那么setmealIds = 空集合
+            if (setmealIds.size() > 0) {
+                LambdaUpdateWrapper<Setmeal> luwSetmeal = new LambdaUpdateWrapper<>();
+                luwSetmeal.in(Setmeal::getId, setmealIds);
+                //注意：这里不能使用luwSetmeal.set(Setmeal::getStatus, status)，因为公共字段update_time等也需要更新
+                Setmeal setmeal = new Setmeal();
+                setmeal.setStatus(status);
+                setmealService.update(setmeal, luwSetmeal);
+            }
+        }
         return R.success("售卖状态修改成功");
     }
 
@@ -165,7 +189,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         //SELECT * FROM dish WHERE id IN (ids)
         List<Dish> dishes = this.listByIds(ids);
         for (Dish dish : dishes) {
-            if (dish.getStatus() == 1){
+            if (dish.getStatus() == 1) {
                 throw new CustomException("存在正在售卖的菜品，无法删除");
             }
         }
