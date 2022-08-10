@@ -8,6 +8,7 @@ const getSetmealPage = (params) => {//在后台套餐管理界面进行分页查
 }
 
 // 删除数据接口
+//在后台套餐管理界面进行单个套餐的删除或者套餐批量删除时，发送delete请求到虚拟路径/setmeal
 const deleteSetmeal = (ids) => {
   return $axios({
     url: '/setmeal',

@@ -203,7 +203,7 @@
           },
 
           // 删除
-          deleteHandle (type, id) {
+          deleteHandle (type, id) {//点击单个套餐的删除或者批量删除时触发此方法
             if (type === '批量' && id === null) {
               if (this.checkList.length === 0) {
                 return this.$message.error('请选择删除对象')

@@ -60,4 +60,12 @@ public class SetmealController {
                                          @RequestParam("ids") List<Long> ids){
         return setmealService.updateSetmealStatus(status, ids);
     }
+
+    /**
+     * 删除和批量删除套餐
+     */
+    @DeleteMapping
+    public R<String> deleteSetmeal(@RequestParam("ids") List<Long> ids){
+        return setmealService.deleteSetmealWithDish(ids);
+    }
 }

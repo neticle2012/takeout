@@ -141,6 +141,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     }
 
     @Override
+    @Transactional
     public R<String> updateDishStatus(int status, List<Long> ids) {
         log.info("status: {}", status);
         log.info("ids: {}", ids);
@@ -179,27 +180,36 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     /**
      * 批量删除菜品，同时删除菜品对应的口味
      * 如果某个菜品正在起售，则整个批量删除失败
-     * TODO 这里还需要进行菜品是否在套餐中的判断
+     * 此外，还需要进行菜品是否在套餐中的判断
      */
     @Override
     @Transactional
     public R<String> deleteDishWithFlavor(List<Long> ids) {
         log.info("ids:{}", ids);
         //查询当前菜品集合中是否存在正在起售的菜品，如果存在，则批量删除失败
-        //SELECT * FROM dish WHERE id IN (ids)
-        List<Dish> dishes = this.listByIds(ids);
-        for (Dish dish : dishes) {
-            if (dish.getStatus() == 1) {
-                throw new CustomException("存在正在售卖的菜品，无法删除");
-            }
+        //SELECT COUNT(*) FROM dish WHERE id IN (ids) AND status = 1
+        LambdaQueryWrapper<Dish> lqwDish = new LambdaQueryWrapper<>();
+        lqwDish.in(ids != null, Dish::getId, ids)
+               .eq(Dish::getStatus, 1);
+        if (this.count(lqwDish) > 0){
+            throw new CustomException("存在正在售卖的菜品，无法删除");
         }
+
+        //查询当前菜品集合中是否存在与套餐关联的菜品，如果存在，则批量删除失败
+        //SELECT COUNT(*) FROM setmeal_dish WHERE dish_id IN (ids)
+        LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
+        lqwSetmealDish.in(ids != null, SetmealDish::getDishId, ids);
+        if (setmealDishService.count(lqwSetmealDish) > 0) {
+            throw new CustomException("存在套餐中的菜品，无法删除");
+        }
+
         //DELETE FROM dish WHERE id IN (ids)
-        this.removeBatchByIds(ids);
+        this.removeByIds(ids);
         //既然已经成功删除了菜品，那么对应的口味直接删除即可
         //DELETE FROM dish_flavor WHERE dish_id IN (ids)
-        LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
-        lqw.in(ids != null, DishFlavor::getDishId, ids);
-        dishFlavorService.remove(lqw);
+        LambdaQueryWrapper<DishFlavor> lqwFlavor = new LambdaQueryWrapper<>();
+        lqwFlavor.in(ids != null, DishFlavor::getDishId, ids);
+        dishFlavorService.remove(lqwFlavor);
         return R.success("菜品删除成功");
     }
 

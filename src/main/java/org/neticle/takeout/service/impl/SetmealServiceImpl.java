@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.mapper.SetmealMapper;
@@ -131,6 +132,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     }
 
     @Override
+    @Transactional
     public R<String> updateSetmealStatus(int status, List<Long> ids) {
         log.info("status: {}", status);
         log.info("ids: {}", ids);
@@ -166,5 +168,29 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             }
         }
         return R.success("售卖状态修改成功");
+    }
+
+    /**
+     * 批量删除套餐，同时删除其关联的菜品数据
+     */
+    @Override
+    @Transactional
+    public R<String> deleteSetmealWithDish(List<Long> ids) {
+        //查询当前套餐集合中是否存在正在起售的套餐，如果存在，则批量删除失败
+        //SELECT COUNT(*) FROM setmeal WHERE id IN (ids) AND status = 1
+        LambdaQueryWrapper<Setmeal> lqwSetmeal = new LambdaQueryWrapper<>();
+        lqwSetmeal.in(ids != null, Setmeal::getId, ids)
+                  .eq(Setmeal::getStatus, 1);
+        if (this.count(lqwSetmeal) > 0) {
+            throw new CustomException("存在正在售卖的套餐，无法删除");
+        }
+        //如果可以删除，先删除setmeal表中的数据
+        this.removeByIds(ids);
+        //再删除setmeal_dish表中关联的菜品数据
+        //DELETE FROM setmeal_dish WHERE setmeal_id IN (ids)
+        LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
+        lqwSetmealDish.in(SetmealDish::getSetmealId, ids);
+        setmealDishService.remove(lqwSetmealDish);
+        return R.success("套餐删除成功");
     }
 }
