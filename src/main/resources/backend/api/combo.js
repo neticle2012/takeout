@@ -17,7 +17,7 @@ const deleteSetmeal = (ids) => {
 }
 
 // 修改数据接口
-const editSetmeal = (params) => {
+const editSetmeal = (params) => {//在后台套餐管理界面修改套餐后，发送put请求到虚拟路径/setmeal
   return $axios({
     url: '/setmeal',
     method: 'put',
@@ -26,7 +26,7 @@ const editSetmeal = (params) => {
 }
 
 // 新增数据接口
-const addSetmeal = (params) => {
+const addSetmeal = (params) => {//在后台套餐管理界面添加套餐后，发送post请求到虚拟路径/setmeal
   return $axios({
     url: '/setmeal',
     method: 'post',
@@ -35,7 +35,7 @@ const addSetmeal = (params) => {
 }
 
 // 查询详情接口
-const querySetmealById = (id) => {
+const querySetmealById = (id) => {//在后台套餐管理界面修改套餐时，发送get请求到虚拟路径/setmeal/${id}
   return $axios({
     url: `/setmeal/${id}`,
     method: 'get'

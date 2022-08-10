@@ -13,4 +13,6 @@ import org.neticle.takeout.pojo.Setmeal;
 public interface SetmealService extends IService<Setmeal> {
     R<String> saveSetmealWithDish(SetmealDto setmealDto);
     R<Page<SetmealDto>> getPage(int page, int pageSize, String name);
+    R<SetmealDto> getSetmealWithDish(Long id);
+    R<String> updateSetmealWithDish(SetmealDto setmealDto);
 }

@@ -186,14 +186,14 @@
             this.init();
           },
           // 添加
-          addSetMeal (st) {//点击添加套餐按钮后触发此方法
-            if (st === 'add'){
+          addSetMeal (st) {//点击添加套餐按钮或者修改按钮后触发此方法
+            if (st === 'add'){//添加套餐
               window.parent.menuHandle({
                 id: '5',
                 url: '/backend/page/combo/add.html',
                 name: '添加套餐'
               },true)
-            } else {
+            } else {//修改某个套餐的信息
               window.parent.menuHandle({
                 id: '5',
                 url: '/backend/page/combo/add.html?id='+st,

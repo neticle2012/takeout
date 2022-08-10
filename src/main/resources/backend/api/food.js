@@ -43,8 +43,8 @@ const queryDishById = (id) => {
 }
 
 // 获取菜品/套餐分类列表
-//在后台菜品管理界面点击添加菜品时发送get请求到虚拟路径/category/list
-//在后台套餐管理界面点击添加套餐时发送get请求到虚拟路径/category/list
+//在后台菜品管理界面点击添加/修改菜品时发送get请求到虚拟路径/category/list
+//在后台套餐管理界面点击添加/修改套餐时发送get请求到虚拟路径/category/list
 const getCategoryList = (params) => {
   return $axios({
     url: '/category/list',

@@ -33,4 +33,20 @@ public class SetmealController {
     public R<Page<SetmealDto>> getPage(int page, int pageSize, String name){
         return setmealService.getPage(page, pageSize, name);
     }
+
+    /**
+     * 根据id查询套餐信息和对应的菜品信息
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getSetmeal(@PathVariable("id") Long id){
+        return setmealService.getSetmealWithDish(id);
+    }
+
+    /**
+     * 修改套餐
+     */
+    @PutMapping
+    public R<String> updateSetmeal(@RequestBody SetmealDto setmealDto){
+        return setmealService.updateSetmealWithDish(setmealDto);
+    }
 }

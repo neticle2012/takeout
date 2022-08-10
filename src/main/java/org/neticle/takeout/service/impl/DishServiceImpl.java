@@ -94,13 +94,13 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     public R<DishDto> getDishWithFlavor(Long id) {
-        //查询菜品基本信息，从dish表chaxun
+        //查询菜品基本信息，从dish表查询
         Dish dish = this.getById(id);
 
         //查询当前菜品对应的口味信息，从dish_flavor表查询
         //SELECT * FROM dish_flavor WHERE dish_id = dish.id
         LambdaQueryWrapper<DishFlavor> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(DishFlavor::getDishId, dish.getId());
+        lqw.eq(DishFlavor::getDishId, id);
         List<DishFlavor> flavors = dishFlavorService.list(lqw);
 
         DishDto dishDto = new DishDto();
@@ -128,6 +128,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         //然后添加当前提交过来的口味数据 -> dish_flavor表的INSERT操作
         List<DishFlavor> flavors = dishDto.getFlavors();//菜品口味集合
         flavors = flavors.stream().map((item) -> {
+            //这里菜品口味集合中是拿到了主键id的，如果先删除再插入会因为sql主键不能重复而报错，
+            // 因此需要先清空主键id，让mybatisplus通过雪花算法重新生成
+            item.setId(null);
             item.setDishId(dishId);
             return item;
         }).collect(Collectors.toList());
