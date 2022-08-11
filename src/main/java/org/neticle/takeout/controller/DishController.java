@@ -74,7 +74,7 @@ public class DishController {
      * 根据条件查询对应的菜品数据
      */
     @GetMapping("/list")
-    public R<List<Dish>> listDish(Dish dish){
+    public R<List<DishDto>> listDish(Dish dish){
         return dishService.listDish(dish);
     }
 }

@@ -19,4 +19,5 @@ public interface SetmealService extends IService<Setmeal> {
     R<String> updateSetmealWithDish(SetmealDto setmealDto);
     R<String> updateSetmealStatus(int status, List<Long> ids);
     R<String> deleteSetmealWithDish(List<Long> ids);
+    R<List<Setmeal>> listSetmeal(Setmeal setmeal);
 }

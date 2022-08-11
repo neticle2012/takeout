@@ -140,6 +140,7 @@
               </div>
           </div>
         </van-popup>
+        <!--展示菜品分类下的所有菜品-->
         <van-dialog v-model="detailsDialog.show" 
                     :show-confirm-button="false" 
                     class="detailsDialog" 
@@ -164,6 +165,7 @@
                   <img src="./images/subtract.png" @click="subtractCart(detailsDialog.item)"/>
                 </div>
                 <div class="divDishNum">{{detailsDialog.item.number}}</div>
+                <!--如果该菜品设置了口味信息，则展示[选择规格]按钮，否则展示[+]按钮-->
                 <div class="divTypes" v-if="detailsDialog.item.flavors && detailsDialog.item.flavors.length > 0 && !detailsDialog.item.number " @click ="chooseFlavorClick(detailsDialog.item)">选择规格</div>
                 <div class="divAdd" v-else>
                   <img src="./images/add.png" @click="addCart(detailsDialog.item)"/>
@@ -174,6 +176,7 @@
             <img src="./images/close.png"/>
           </div>
         </van-dialog>
+        <!--展示套餐分类下的所有套餐-->
         <van-dialog v-model="setMealDialog.show" 
                     :show-confirm-button="false" 
                     class="setMealDetailsDialog" 
@@ -295,6 +298,7 @@
           methods:{
             //初始化数据
             initData(){
+              //发送两次请求，分别请求菜品&套餐分类和购物车，必须同时成功，页面才能展示成功
               Promise.all([categoryListApi(),cartListApi({})]).then(res=>{
                 //获取分类数据
                 if(res[0].code === 1){
@@ -319,16 +323,16 @@
               })
             },
             //分类点击
-            categoryClick(index,id,type){
+            categoryClick(index,id,type){//点击左侧分类时触发此方法
               this.activeType = index
               this.categoryId = id
-              if(type === 1){//菜品
+              if(type === 1){//如果该分类为菜品分类
                 this.getDishList()
-              }else{
+              }else{//如果该分类为套餐分类
                 this.getSetmealData()
               }
             },
-            //获取菜品数据
+            //获取某一菜品分类下所有的菜品数据
             async getDishList(){
               if(!this.categoryId){
                 return
@@ -351,7 +355,7 @@
                 this.$notify({ type:'warning', message:res.msg});
               }
             },
-            //获取套餐数据setmealId
+            //获取某一套餐分类下所有套餐的数据
             async getSetmealData(){
               if(!this.categoryId){
                 return

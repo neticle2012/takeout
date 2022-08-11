@@ -1,5 +1,5 @@
-//获取所有的菜品分类
-function categoryListApi() {
+//获取所有的菜品和套餐分类
+function categoryListApi() {//移动端页面加载时，发送get请求到虚拟路径/category/list
     return $axios({
       'url': '/category/list',
       'method': 'get',
@@ -7,7 +7,7 @@ function categoryListApi() {
   }
 
 //获取菜品分类对应的菜品
-function dishListApi(data) {
+function dishListApi(data) {//移动端主页上选中某一菜品分类时，发送get请求到虚拟路径/dish/list
     return $axios({
         'url': '/dish/list',
         'method': 'get',
@@ -16,7 +16,7 @@ function dishListApi(data) {
 }
 
 //获取菜品分类对应的套餐
-function setmealListApi(data) {
+function setmealListApi(data) {//移动端主页上选中某一套餐分类时，发送get请求到虚拟路径/setmeal/list
     return $axios({
         'url': '/setmeal/list',
         'method': 'get',
@@ -27,7 +27,7 @@ function setmealListApi(data) {
 //获取购物车内商品的集合
 function cartListApi(data) {
     return $axios({
-        'url': '/shoppingCart/list',
+        'url': '/front/cartData.json', //先暂时请求静态资源，保证页面展示成功
         'method': 'get',
         params:{...data}
     })

@@ -3,6 +3,7 @@ package org.neticle.takeout.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.SetmealDto;
+import org.neticle.takeout.pojo.Setmeal;
 import org.neticle.takeout.service.SetmealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -67,5 +68,13 @@ public class SetmealController {
     @DeleteMapping
     public R<String> deleteSetmeal(@RequestParam("ids") List<Long> ids){
         return setmealService.deleteSetmealWithDish(ids);
+    }
+
+    /**
+     * 根据条件查询套餐数据
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> listSetmeal(Setmeal setmeal){
+        return setmealService.listSetmeal(setmeal);
     }
 }

@@ -193,4 +193,16 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         setmealDishService.remove(lqwSetmealDish);
         return R.success("套餐删除成功");
     }
+
+    @Override
+    public R<List<Setmeal>> listSetmeal(Setmeal setmeal) {
+        LambdaQueryWrapper<Setmeal> lqwSetmeal = new LambdaQueryWrapper<>();
+        //SELECT * FROM setmeal WHERE category_id = setmeal.categoryId AND status = 1
+        // ORDER BY update_time DESC
+        lqwSetmeal.eq(Setmeal::getCategoryId, setmeal.getCategoryId())
+                  .eq(Setmeal::getStatus, 1) //要求套餐必须是起售的，禁售套餐不显示
+                  .orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> setmeals = this.list(lqwSetmeal);
+        return R.success(setmeals);
+    }
 }

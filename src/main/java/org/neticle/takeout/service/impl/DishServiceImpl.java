@@ -214,14 +214,26 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     }
 
     @Override
-    public R<List<Dish>> listDish(Dish dish) {
+    public R<List<DishDto>> listDish(Dish dish) {
         //SELECT * FROM dish WHERE category_id = dish.categoryId AND status = 1
         // ORDER BY sort ASC, update_time DESC
-        LambdaQueryWrapper<Dish> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
-        lqw.eq(Dish::getStatus, 1);//要求菜品必须是起售的，禁售菜品不显示
-        lqw.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
-        List<Dish> dishes = this.list(lqw);
-        return R.success(dishes);
+        LambdaQueryWrapper<Dish> lqwDish = new LambdaQueryWrapper<>();
+        lqwDish.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        lqwDish.eq(Dish::getStatus, 1);//要求菜品必须是起售的，禁售菜品不显示
+        lqwDish.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> dishes = this.list(lqwDish);
+        List<DishDto> dishDtos = dishes.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);//将Dish对象的属性都拷贝到DishDto对象中
+            //根据菜品id查询对应的口味集合
+            //SELECT * FROM dish_flavor WHERE dish_id = item.id
+            LambdaQueryWrapper<DishFlavor> lqwDishFlavor = new LambdaQueryWrapper<>();
+            lqwDishFlavor.eq(DishFlavor::getDishId, item.getId());
+            List<DishFlavor> dishFlavors = dishFlavorService.list(lqwDishFlavor);
+            //将口味集合设置到DishDto对象的flavors属性中，如果菜品没有口味，那么dishFlavors集合为空集合
+            dishDto.setFlavors(dishFlavors);
+            return dishDto;
+        }).collect(Collectors.toList());
+        return R.success(dishDtos);
     }
 }
