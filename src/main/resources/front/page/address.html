@@ -107,7 +107,7 @@
                     }
                 },
                 computed:{},
-                created(){
+                created(){//钩子函数，Vue对象创建时调用
                     this.initData()
                 },
                 mounted(){},
@@ -115,6 +115,8 @@
                     goBack(){
                         history.go(-1)
                     },
+                    //点击添加收货地址或者编辑收货地址按钮触发此方法，跳转到页面/front/page/address-edit.html?id=${item.id}
+                    //item是addressList属性中的每个元素，如果带有item说明是修改现有收货地址，否则为新增收获地址
                     toAddressEditPage(item){
                         window.requestAnimationFrame(()=>{
                             window.location.href= `/front/page/address-edit.html?id=${item.id}`
@@ -126,14 +128,14 @@
                         })
                     },
                     async initData(){
-                        const res = await addressListApi()
+                        const res = await addressListApi()//获取当前用户的所有收货地址
                         if(res.code === 1){
                             this.addressList = res.data
                         }else{
                             this.$message.error(res.msg)
                         }
                     },
-                    async setDefaultAddress(item){
+                    async setDefaultAddress(item){//点击设为默认地址时触发此方法
                         if(item.id){
                             const res = await setDefaultAddressApi({id:item.id})
                             if(res.code === 1){

@@ -5,6 +5,7 @@ function imgPath(path){
 }
 
 //将url传参转换为数组
+//例如 /front/page/address-edit.html?id=1234&name=abc -> 返回param["id"] = 1234, param["name"] = abc
 function parseUrl(url) {
     // 找到url中的第一个?号
     var parse = url.substring(url.indexOf("?") + 1),
