@@ -1,6 +1,10 @@
 server:
   port: 8080
 spring:
+  mail:
+    username: olgfood_official@163.com
+    # password: 
+    host: smtp.163.com
   application:
     #应用名称
     name: my_take_out

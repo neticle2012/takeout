@@ -33,8 +33,14 @@ public class LoginCheckFilter implements Filter {
         log.info("拦截到请求: {}", requestURI);
         // 定义不需要处理的请求路径：servlet请求（/employee/login、employee/logout）
         // 静态资源请求（/backend/**、/front/**）
-        String[] urls = {"/employee/login", "employee/logout", "/backend/**", "/front/**",
-                "/common/**"};
+        String[] urls = {"/employee/login",
+                         "employee/logout",
+                         "/backend/**",
+                         "/front/**",
+                         "/common/**",
+                         "/user/sendMsg", //移动端发送短信
+                         "/user/login"  //移动端登录
+        };
         // 2、判断本次请求是否需要处理，如果不需要处理，则直接放行
         boolean check = check(urls, requestURI);
         if (check){
@@ -42,11 +48,20 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
-        // 3、判断登录状态，如果已登录，则直接放行
+        // 3-1、判断管理端后台用户登录状态，如果已登录，则直接放行
         Long empId = null;
         if ((empId = (Long) request.getSession().getAttribute("employee")) != null){
-            log.info("用户已登录，用户id为: {}", empId);
+            log.info("后台用户已登录，用户id为: {}", empId);
             BaseContext.setCurrentId(empId);
+            log.info("线程id = {}", Thread.currentThread().getId());
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // 3-2、判断移动端前台用户登录状态，如果已登录，则直接放行
+        Long userId = null;
+        if ((userId = (Long) request.getSession().getAttribute("user")) != null){
+            log.info("前台用户已登录，用户id为: {}", userId);
+            BaseContext.setCurrentId(userId);
             log.info("线程id = {}", Thread.currentThread().getId());
             filterChain.doFilter(request, response);
             return;
