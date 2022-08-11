@@ -41,4 +41,12 @@ public class ShoppingCartController {
     public R<String> cleanShoppingCart() {
         return shoppingCartService.cleanShoppingCart();
     }
+
+    /**
+     * 减少购物车
+     */
+    @PostMapping("/sub")
+    public R<ShoppingCart> subShoppingCart(@RequestBody ShoppingCart shoppingCart) {
+        return shoppingCartService.subShoppingCart(shoppingCart);
+    }
 }

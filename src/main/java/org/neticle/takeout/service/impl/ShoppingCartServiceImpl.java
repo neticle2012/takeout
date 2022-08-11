@@ -73,4 +73,35 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         this.remove(lqwShoppingCart);
         return R.success("清空购物车成功");
     }
+
+    @Override
+    public R<ShoppingCart> subShoppingCart(ShoppingCart shoppingCartSub) {
+        log.info("购物车数据: {}", shoppingCartSub);
+        //设置用户id，指定当前是哪个用户的购物车数据
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartSub.setUserId(userId);
+
+        //与添加购物车不同，减少购物车无需判断当前菜品/套餐是否在购物车中，因为其一定在
+        //SELECT * FROM shopping_cart WHERE user_id = userId AND dish_id = shoppingCart.dishId
+        //SELECT * FROM shopping_cart WHERE user_id = userId AND setmeal_id = shoppingCart.setmealId
+        LambdaQueryWrapper<ShoppingCart> lqwShoppingCart = new LambdaQueryWrapper<>();
+        lqwShoppingCart.eq(ShoppingCart::getUserId, userId);
+        Long dishId = shoppingCartSub.getDishId();
+        Long setmealId = shoppingCartSub.getSetmealId();
+        if (dishId != null) {//说明当前减少的是菜品
+            lqwShoppingCart.eq(ShoppingCart::getDishId, dishId);
+        } else {//说明当前添加的是套餐
+            lqwShoppingCart.eq(ShoppingCart::getSetmealId, setmealId);
+        }
+        ShoppingCart shoppingCartOrigin = this.getOne(lqwShoppingCart);
+
+        int number = shoppingCartOrigin.getNumber();
+        shoppingCartOrigin.setNumber(--number);//数量 - 1
+        if (number > 0) {//购物车中还有该菜品/套餐，直接更新数量
+            this.updateById(shoppingCartOrigin);
+        } else {//说明购物车中该菜品/套餐的数量已经为0了，直接从表中删除即可
+            this.removeById(shoppingCartOrigin);
+        }
+        return R.success(shoppingCartOrigin);
+    }
 }

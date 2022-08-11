@@ -44,7 +44,8 @@ function  addCartApi(data){
       })
 }
 
-//购物车中修改商品
+//购物车中减少商品
+//点击减号时，发送post请求到虚拟路径/shoppingCart/sub
 function  updateCartApi(data){
     return $axios({
         'url': '/shoppingCart/sub',
