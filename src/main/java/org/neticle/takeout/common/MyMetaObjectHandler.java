@@ -22,10 +22,10 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         log.info("公共字段自动填充[insert]...");
         log.info(metaObject.toString());
-        metaObject.setValue("createTime", LocalDateTime.now());
-        metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("createUser", BaseContext.getCurrentId());
-        metaObject.setValue("updateUser", BaseContext.getCurrentId());
+        if (metaObject.hasSetter("createTime")) metaObject.setValue("createTime", LocalDateTime.now());
+        if (metaObject.hasSetter("updateTime")) metaObject.setValue("updateTime", LocalDateTime.now());
+        if (metaObject.hasSetter("createUser")) metaObject.setValue("createUser", BaseContext.getCurrentId());
+        if (metaObject.hasSetter("updateUser")) metaObject.setValue("updateUser", BaseContext.getCurrentId());
     }
 
     /**
@@ -36,7 +36,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         log.info("公共字段自动填充[update]...");
         log.info(metaObject.toString());
         log.info("线程id = {}", Thread.currentThread().getId());
-        metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("updateUser", BaseContext.getCurrentId());
+        if (metaObject.hasSetter("updateTime")) metaObject.setValue("updateTime", LocalDateTime.now());
+        if (metaObject.hasSetter("updateUser")) metaObject.setValue("updateUser", BaseContext.getCurrentId());
     }
 }

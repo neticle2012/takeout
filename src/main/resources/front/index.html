@@ -314,7 +314,7 @@
                 }else{
                   this.$notify({ type:'warning', message:res[0].msg});
                 }
-                //获取菜品数据
+                //获取购物车中的菜品/套餐数据
                 if(res[1].code === 1){
                 this.cartData = res[1].data
                 }else{
@@ -388,7 +388,7 @@
               }
             },
             //菜单中往购物车中添加商品
-            async addCart(item){
+            async addCart(item){//点击加号或者选择口味后点击加入购物车按钮时，触发此方法
               let params = {
                 amount:item.price/100,//金额
                 dishFlavor:item.dishFlavor,//口味  如果没有传undefined
@@ -502,7 +502,7 @@
             },
             
             //清空购物车
-            async clearCart(){
+            async clearCart(){//点击购物车右上角的清空按钮时触发此方法
                 const res = await clearCartApi()
                 if(res.code === 1){
                   for(let ele of this.dishList){
@@ -539,7 +539,7 @@
               this.dialogFlavor.show = true
             },
             //选择规格加入购物车
-            dialogFlavorAddCart(){
+            dialogFlavorAddCart(){//选择菜品口味后，点击加入购物车按钮时触发此方法
               const dialogFlavor = this.dialogFlavor
               let flag = true
               let dishFlavor = []

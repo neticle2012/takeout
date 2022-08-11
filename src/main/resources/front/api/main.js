@@ -25,15 +25,17 @@ function setmealListApi(data) {//移动端主页上选中某一套餐分类时�
 }
 
 //获取购物车内商品的集合
+//增减购物车的菜品/套餐或者移动端主页加载时，发送get请求到虚拟路径/shoppingCart/list
 function cartListApi(data) {
     return $axios({
-        'url': '/front/cartData.json', //先暂时请求静态资源，保证页面展示成功
+        'url': '/shoppingCart/list',
         'method': 'get',
         params:{...data}
     })
 }
 
 //购物车中添加商品
+//点击加号或者选择口味后点击加入购物车按钮时，发送post请求到虚拟路径/shoppingCart/add
 function  addCartApi(data){
     return $axios({
         'url': '/shoppingCart/add',
@@ -52,7 +54,7 @@ function  updateCartApi(data){
 }
 
 //删除购物车的商品
-function clearCartApi() {
+function clearCartApi() {//点击购物车右上角的清空按钮时，发送delete请求到虚拟路径/shoppingCart/clean
     return $axios({
         'url': '/shoppingCart/clean',
         'method': 'delete',
