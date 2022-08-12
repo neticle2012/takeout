@@ -2,14 +2,17 @@ package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.BaseContext;
 import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.OrdersDto;
 import org.neticle.takeout.mapper.OrdersMapper;
 import org.neticle.takeout.pojo.*;
 import org.neticle.takeout.service.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +51,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         //SELECT * FROM shopping_cart WHERE user_id = userId
         LambdaQueryWrapper<ShoppingCart> lqwShoppingCart = new LambdaQueryWrapper<>();
         lqwShoppingCart.eq(ShoppingCart::getUserId, userId);
-        List<ShoppingCart> shoppingCarts = shoppingCartService.list();
+        List<ShoppingCart> shoppingCarts = shoppingCartService.list(lqwShoppingCart);
         if (shoppingCarts == null || shoppingCarts.size() == 0) {
             throw new CustomException("购物车为空，不能下单");
         }
@@ -99,5 +102,35 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         //清空购物车数据 -> shopping_cart表DELETE
         shoppingCartService.remove(lqwShoppingCart);
         return R.success("下单成功");
+    }
+
+    @Override
+    public R<Page<OrdersDto>> getUserPage(int page, int pageSize) {
+        Page<Orders> ordersPageInfo = new Page<>(page, pageSize);
+        Page<OrdersDto> ordersDtoPageInfo = new Page<>(page, pageSize);
+        //SELECT * FROM orders WHERE user_id = session.id ORDER BY order_time DESC
+        // LIMIT (page - 1)*pageSize ,pageSize
+        LambdaQueryWrapper<Orders> lqwOrders = new LambdaQueryWrapper<>();
+        lqwOrders.eq(Orders::getUserId, BaseContext.getCurrentId())
+                 .orderByDesc(Orders::getOrderTime);
+        this.page(ordersPageInfo, lqwOrders);
+
+        //将ordersPageInfo对象的属性都拷贝到ordersDtoPageInfo对象中（忽略records属性）
+        BeanUtils.copyProperties(ordersPageInfo, ordersDtoPageInfo, "records");
+        List<OrdersDto> ordersDtos = ordersPageInfo.getRecords().stream().map((item) -> {
+            OrdersDto ordersDto = new OrdersDto();
+            BeanUtils.copyProperties(item, ordersDto);//将Orders对象的属性都拷贝到OrdersDto对象中
+            //SELECT * FROM order_detail WHERE order_id = item.number
+            LambdaQueryWrapper<OrderDetail> lqwOrderDetail = new LambdaQueryWrapper<>();
+            lqwOrderDetail.eq(OrderDetail::getOrderId, item.getNumber());
+            List<OrderDetail> orderDetails = orderDetailService.list(lqwOrderDetail);
+            if (orderDetails != null) {
+                //将订单明细集合设置到OrdersDto对象的orderDetails属性中
+                ordersDto.setOrderDetails(orderDetails);
+            }
+            return ordersDto;
+        }).collect(Collectors.toList());
+        ordersDtoPageInfo.setRecords(ordersDtos);
+        return R.success(ordersDtoPageInfo);
     }
 }

@@ -105,7 +105,7 @@
                 }
             },
             computed:{},
-            created(){
+            created(){//钩子函数，Vue对象创建时自动调用
                 this.userPhone =sessionStorage.getItem("userPhone")
                 this.initData()
             },
@@ -127,7 +127,7 @@
                 initData(){
                     this.getLatestOrder()
                 },
-                async getLatestOrder(){
+                async getLatestOrder(){//当加载用户中心界面时触发此方法
                     const params = {
                         page:1,
                         pageSize:1
@@ -138,7 +138,7 @@
                         if(this.order && this.order[0].orderDetails){
                             let number = 0
                             this.order[0].orderDetails.forEach(item=>{
-                                number += item.number
+                                number += item.number //前端计算该用户每份订单中菜品/套餐的总数量
                             })
                             this.order[0].sumNum = number
                         }

@@ -16,7 +16,7 @@ function orderListApi() {
 }
 
 //分页查询订单
-function orderPagingApi(data) {
+function orderPagingApi(data) {//在加载用户中心界面时，发送get请求到虚拟路径/order/userPage
   return $axios({
       'url': '/order/userPage',
       'method': 'get',

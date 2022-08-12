@@ -1,13 +1,12 @@
 package org.neticle.takeout.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.OrdersDto;
 import org.neticle.takeout.pojo.Orders;
 import org.neticle.takeout.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Faruku123
@@ -25,5 +24,13 @@ public class OrdersController {
     @PostMapping("/submit")
     public R<String> submitOrders(@RequestBody Orders orders) {
         return ordersService.submitOrders(orders);
+    }
+
+    /**
+     * 用户查看自己所有的订单
+     */
+    @GetMapping("/userPage")
+    public R<Page<OrdersDto>> getUserPage(int page, int pageSize) {
+        return ordersService.getUserPage(page, pageSize);
     }
 }
