@@ -23,8 +23,16 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
         implements AddressBookService {
     @Override
     public R<AddressBook> saveAddress(AddressBook addressBook) {
-        addressBook.setUserId(BaseContext.getCurrentId());
+        Long userId = BaseContext.getCurrentId();
+        addressBook.setUserId(userId);
         log.info("addressBook: {}", addressBook);
+        //如果这是该用户的第一个地址，则直接设置为默认地址
+        //SELECT COUNT(*) FROM address_book WHERE user_id = userId
+        LambdaQueryWrapper<AddressBook> lqwAddressBook = new LambdaQueryWrapper<>();
+        lqwAddressBook.eq(AddressBook::getUserId, userId);
+        if (this.count(lqwAddressBook) == 0) {
+            addressBook.setIsDefault(1);
+        }
         this.save(addressBook);
         return R.success(addressBook);
     }
@@ -72,5 +80,15 @@ public class AddressBookServiceImpl extends ServiceImpl<AddressBookMapper, Addre
     public R<String> deleteAddress(Long id) {
         this.removeById(id);
         return R.success("删除收货地址成功");
+    }
+
+    @Override
+    public R<AddressBook> getDefaultAddress() {
+        //SELECT * FROM address_book WHERE user_id = session.id AND is_default = 1
+        LambdaQueryWrapper<AddressBook> lqwAddressBook = new LambdaQueryWrapper<>();
+        lqwAddressBook.eq(AddressBook::getUserId, BaseContext.getCurrentId())
+                      .eq(AddressBook::getIsDefault, 1);
+        AddressBook addressBook = this.getOne(lqwAddressBook);
+        return addressBook != null ? R.success(addressBook) : R.error("没有找到该对象");
     }
 }

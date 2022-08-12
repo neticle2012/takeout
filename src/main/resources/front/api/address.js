@@ -61,6 +61,7 @@ function  setDefaultAddressApi(data){
 }
 
 //获取默认地址
+//加载结算界面时，发送get请求到虚拟路径/addressBook/default
 function getDefaultAddressApi() {
   return $axios({
     'url': `/addressBook/default`,

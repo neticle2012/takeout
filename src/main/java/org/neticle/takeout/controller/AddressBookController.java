@@ -65,4 +65,12 @@ public class AddressBookController {
     public R<String> deleteAddress(@RequestParam("ids") Long id) {
         return addressBookService.deleteAddress(id);
     }
+
+    /**
+     * 查询默认收货地址
+     */
+    @GetMapping("/default")
+    public R<AddressBook> getDefaultAddress() {
+        return addressBookService.getDefaultAddress();
+    }
 }

@@ -1,5 +1,5 @@
 //提交订单
-function  addOrderApi(data){
+function  addOrderApi(data){//在订单界面点击去支付按钮时，发送post请求到虚拟路径/order/submit
     return $axios({
         'url': '/order/submit',
         'method': 'post',

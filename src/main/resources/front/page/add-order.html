@@ -132,7 +132,7 @@
                     return price
                     }
                 },
-                created(){
+                created(){//钩子函数，Vue对象创建时调用
                     this.initData()
                 },
                 mounted(){},
@@ -185,7 +185,7 @@
                             this.$notify({ type:'warning', message:res.msg});
                         }
                     },
-                    async goToPaySuccess(){
+                    async goToPaySuccess(){//在订单界面点击去支付按钮触发此方法
                         const params = {
                             remark:this.note,
                             payMethod:1,

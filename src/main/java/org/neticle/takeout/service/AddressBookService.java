@@ -17,4 +17,5 @@ public interface AddressBookService extends IService<AddressBook> {
     R<AddressBook> getAddressById(Long id);
     R<String> updateAddress(AddressBook addressBook);
     R<String> deleteAddress(Long id);
+    R<AddressBook> getDefaultAddress();
 }
