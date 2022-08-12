@@ -2,6 +2,7 @@ package org.neticle.takeout.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.pojo.Setmeal;
 import org.neticle.takeout.service.SetmealService;
@@ -76,5 +77,15 @@ public class SetmealController {
     @GetMapping("/list")
     public R<List<Setmeal>> listSetmeal(Setmeal setmeal){
         return setmealService.listSetmeal(setmeal);
+    }
+
+    /**
+     * 查看指定id套餐下所有的菜品数据
+     * 在移动端点击套餐图片时触发
+     * 这里返回的是 DishDto对象，因为前端需要copies这个属性
+     */
+    @GetMapping("/dish/{id}")
+    public R<List<DishDto>> listDishesInSetmeal(@PathVariable("id") Long setmealId) {
+        return setmealService.listDishesInSetmeal(setmealId);
     }
 }

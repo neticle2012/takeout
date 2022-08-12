@@ -63,7 +63,7 @@ function clearCartApi() {//点击购物车右上角的清空按钮时，发送de
 }
 
 //获取套餐的全部菜品
-function setMealDishDetailsApi(id) {
+function setMealDishDetailsApi(id) {//点击套餐图片时，发送get请求到虚拟路径/setmeal/dish/${id}
     return $axios({
         'url': `/setmeal/dish/${id}`,
         'method': 'get',

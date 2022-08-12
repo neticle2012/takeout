@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.mapper.SetmealMapper;
 import org.neticle.takeout.pojo.Category;
@@ -204,5 +205,24 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
                   .orderByDesc(Setmeal::getUpdateTime);
         List<Setmeal> setmeals = this.list(lqwSetmeal);
         return R.success(setmeals);
+    }
+
+    @Override
+    public R<List<DishDto>> listDishesInSetmeal(Long setmealId) {
+        //SELECT * FROM setmeal_dish WHERE setmeal_id = setmealId
+        LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
+        lqwSetmealDish.eq(SetmealDish::getSetmealId, setmealId);
+        List<SetmealDish> setmealDishes = setmealDishService.list(lqwSetmealDish);
+        List<DishDto> dishDtos = setmealDishes.stream().map((item) -> {
+            //SELECT * FROM dish WHERE id = item.dishId
+            Dish dish = dishService.getById(item.getDishId());
+            DishDto dishDto = new DishDto();
+            //将Dish对象的属性都拷贝到DishDto对象中
+            BeanUtils.copyProperties(dish, dishDto);
+            //将菜品份数设置到DishDto对象的copies属性中
+            dishDto.setCopies(item.getCopies());
+            return dishDto;
+        }).collect(Collectors.toList());
+        return R.success(dishDtos);
     }
 }

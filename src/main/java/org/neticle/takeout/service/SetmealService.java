@@ -3,6 +3,7 @@ package org.neticle.takeout.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.pojo.Setmeal;
 
@@ -20,4 +21,5 @@ public interface SetmealService extends IService<Setmeal> {
     R<String> updateSetmealStatus(int status, List<Long> ids);
     R<String> deleteSetmealWithDish(List<Long> ids);
     R<List<Setmeal>> listSetmeal(Setmeal setmeal);
+    R<List<DishDto>> listDishesInSetmeal(Long setmealId);
 }
