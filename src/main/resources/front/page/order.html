@@ -130,7 +130,7 @@
                         this.$notify({ type:'warning', message:res.msg});
                     }
                 },
-                async addOrderAgain(order){
+                async addOrderAgain(order){//点击再来一单时触发此方法
                     const res = await orderAgainApi({id:order.id})
                     if(res.code === 1){
                         window.requestAnimationFrame(()=>{

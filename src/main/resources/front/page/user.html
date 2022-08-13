@@ -119,7 +119,7 @@
                         window.location.href = '/front/page/address.html'
                     })  
                 },
-                toOrderPage(){
+                toOrderPage(){//点击历史订单跳转到页面/front/page/order.html
                     window.requestAnimationFrame(()=>{
                         window.location.href = '/front/page/order.html'
                     }) 
@@ -168,7 +168,7 @@
                     }
                     return str
                 },
-                async addOrderAgain(){
+                async addOrderAgain(){//点击再来一单时触发此方法
                     const res = await orderAgainApi({id:this.order[0].id})
                     if(res.code === 1){
                         window.requestAnimationFrame(()=>{

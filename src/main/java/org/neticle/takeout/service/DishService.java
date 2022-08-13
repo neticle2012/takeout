@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.pojo.Dish;
+import org.neticle.takeout.pojo.ShoppingCart;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface DishService extends IService<Dish> {
     R<String> updateDishStatus(int status, List<Long> ids);
     R<String> deleteDishWithFlavor(List<Long> ids);
     R<List<DishDto>> listDish(Dish dish);
+    void setLatestDishInfoToShoppingCart(Long dishId, ShoppingCart shoppingCart);
 }

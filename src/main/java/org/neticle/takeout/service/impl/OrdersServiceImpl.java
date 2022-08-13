@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
     private AddressBookService addressBookService;
     @Autowired
     private OrderDetailService orderDetailService;
+    @Autowired
+    private DishService dishService;
+    @Autowired
+    private SetmealService setmealService;
 
     @Override
     @Transactional
@@ -132,5 +137,40 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         }).collect(Collectors.toList());
         ordersDtoPageInfo.setRecords(ordersDtos);
         return R.success(ordersDtoPageInfo);
+    }
+
+    @Override
+    public R<String> submitOrdersAgain(Orders orders) {
+        log.info("订单数据: {}", orders);
+        String orderId = this.getById(orders.getId()).getNumber();//得到订单号
+        log.info("订单号:{}", orderId);
+
+        //清空当前用户的购物车，因为需要将要再来一单的菜品和套餐加入到购物车中
+        shoppingCartService.cleanShoppingCart();
+        //获取该订单对应的订单明细集合
+        //SELECT * FROM order_detail WHERE order_id = orderId
+        LambdaQueryWrapper<OrderDetail> lqwOrderDetail = new LambdaQueryWrapper<>();
+        lqwOrderDetail.eq(OrderDetail::getOrderId, orderId);
+        List<OrderDetail> orderDetails = orderDetailService.list(lqwOrderDetail);
+        //将订单明细集合中的菜品和套餐信息加入到购物车中
+        //注意！必须从dish/setmeal表中获取每个菜品/套餐最新数据！！！
+        //因为如果再来一单中的菜品/套餐出现变动（例如价格、图片），需要获取最新信息
+        //如果再来一单中的菜品/套餐被禁售，或者口味已经不存在，则直接报错，无法再来一单
+        List<ShoppingCart> shoppingCarts = orderDetails.stream().map((item) -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            shoppingCart.setUserId(BaseContext.getCurrentId());
+            shoppingCart.setDishFlavor(item.getDishFlavor());
+            shoppingCart.setNumber(item.getNumber());
+            Long dishId = item.getDishId();
+            Long setmealId = item.getSetmealId();
+            if (dishId != null) {//该条订单明细记录的是菜品 -> dish表
+                dishService.setLatestDishInfoToShoppingCart(dishId, shoppingCart);
+            } else {//该条订单明细记录的是套餐 -> setmeal表
+                setmealService.setLatestSetmealInfoToShoppingCart(setmealId, shoppingCart);
+            }
+            return shoppingCart;
+        }).collect(Collectors.toList());
+        shoppingCartService.saveBatch(shoppingCarts);
+        return R.success("操作成功");
     }
 }

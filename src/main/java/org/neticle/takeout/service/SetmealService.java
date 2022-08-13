@@ -6,6 +6,7 @@ import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.pojo.Setmeal;
+import org.neticle.takeout.pojo.ShoppingCart;
 
 import java.util.List;
 
@@ -22,4 +23,5 @@ public interface SetmealService extends IService<Setmeal> {
     R<String> deleteSetmealWithDish(List<Long> ids);
     R<List<Setmeal>> listSetmeal(Setmeal setmeal);
     R<List<DishDto>> listDishesInSetmeal(Long setmealId);
+    void setLatestSetmealInfoToShoppingCart(Long setmealId, ShoppingCart shoppingCart);
 }

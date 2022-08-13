@@ -25,7 +25,7 @@ function orderPagingApi(data) {//在加载用户中心界面时，发送get请�
 }
 
 //再来一单
-function orderAgainApi(data) {
+function orderAgainApi(data) {//点击再来一单按钮时，发送post请求到虚拟路径/order/again
   return $axios({
       'url': '/order/again',
       'method': 'post',

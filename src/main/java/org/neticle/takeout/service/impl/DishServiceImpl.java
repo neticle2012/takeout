@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.neticle.takeout.common.BaseContext;
 import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
@@ -17,8 +18,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -235,5 +236,47 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             return dishDto;
         }).collect(Collectors.toList());
         return R.success(dishDtos);
+    }
+
+    /**
+     * 根据菜品id获取最新的菜品信息，将其封装到ShoppingCart对象中
+     */
+    @Override
+    public void setLatestDishInfoToShoppingCart(Long dishId, ShoppingCart shoppingCart) {
+        Dish dish = this.getById(dishId);
+        if (dish == null || dish.getStatus() == 0) {
+            throw new CustomException("当前订单中有菜品不存在或者存在停售菜品");
+        }
+        String flavorValOld = shoppingCart.getDishFlavor();
+        log.info("之前的口味值: {}", flavorValOld);
+        //查询当前菜品对应的最新口味信息，从dish_flavor表查询
+        //SELECT * FROM dish_flavor WHERE dish_id = dishId
+        LambdaQueryWrapper<DishFlavor> lqwDishFlavor = new LambdaQueryWrapper<>();
+        lqwDishFlavor.eq(DishFlavor::getDishId, dishId);
+        List<DishFlavor> flavors = dishFlavorService.list(lqwDishFlavor);
+        if (flavorValOld == null && flavors.size() > 0) {
+            //说明原来没有口味的菜品添加了口味数据
+            throw new CustomException("当前订单中有菜品增加了口味，请手动重新选择");
+        }
+        if (flavorValOld != null) {//该菜品存在口味信息
+            Set<String> flavorsSet = new HashSet<>();
+            for (DishFlavor flavor : flavors) {
+                String flavorValNew = flavor.getValue();
+                log.info("最新口味值: {}", flavorValNew);
+                //["不要葱","不要蒜","不要香菜","不要辣"] -> 不要葱 不要蒜 不要香菜 不要辣
+                flavorsSet.addAll(Arrays.stream(flavorValNew.substring(1, flavorValNew.length() - 1)
+                                                            .split(","))
+                                        .map(item -> item.substring(1, item.length() - 1))
+                                        .collect(Collectors.toList()));
+            }
+            if (!flavorsSet.containsAll(Arrays.asList(flavorValOld.split(",")))) {
+                throw new CustomException("当前订单中有菜品口味不存在");
+            }
+        }
+        //如果可以执行到这里，说明该菜品和其口味都还存在，则设置菜品的最新信息
+        shoppingCart.setName(dish.getName());
+        shoppingCart.setImage(dish.getImage());
+        shoppingCart.setDishId(dishId);
+        shoppingCart.setAmount(BigDecimal.valueOf(dish.getPrice().doubleValue() / 100));
     }
 }

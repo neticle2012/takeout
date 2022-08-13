@@ -8,6 +8,8 @@ import org.neticle.takeout.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * @author Faruku123
  * @version 1.0
@@ -32,5 +34,13 @@ public class OrdersController {
     @GetMapping("/userPage")
     public R<Page<OrdersDto>> getUserPage(int page, int pageSize) {
         return ordersService.getUserPage(page, pageSize);
+    }
+
+    /**
+     * 用户再来一单
+     */
+    @PostMapping("/again")
+    public R<String> submitOrdersAgain(@RequestBody Orders orders) {
+        return ordersService.submitOrdersAgain(orders);
     }
 }

@@ -6,15 +6,13 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.neticle.takeout.common.BaseContext;
 import org.neticle.takeout.common.CustomException;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.dto.SetmealDto;
 import org.neticle.takeout.mapper.SetmealMapper;
-import org.neticle.takeout.pojo.Category;
-import org.neticle.takeout.pojo.Dish;
-import org.neticle.takeout.pojo.Setmeal;
-import org.neticle.takeout.pojo.SetmealDish;
+import org.neticle.takeout.pojo.*;
 import org.neticle.takeout.service.CategoryService;
 import org.neticle.takeout.service.DishService;
 import org.neticle.takeout.service.SetmealDishService;
@@ -25,6 +23,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -224,5 +223,21 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             return dishDto;
         }).collect(Collectors.toList());
         return R.success(dishDtos);
+    }
+
+    /**
+     * 根据套餐id获取最新的套餐信息，将其封装到ShoppingCart对象中
+     */
+    @Override
+    public void setLatestSetmealInfoToShoppingCart(Long setmealId, ShoppingCart shoppingCart) {
+        Setmeal setmeal = this.getById(setmealId);
+        if (setmeal == null || setmeal.getStatus() == 0) {
+            throw new CustomException("当前订单中有套餐不存在或者存在停售套餐");
+        }
+        //如果可以执行到这里，说明该套餐还存在，则设置套餐的最新信息
+        shoppingCart.setName(setmeal.getName());
+        shoppingCart.setImage(setmeal.getImage());
+        shoppingCart.setSetmealId(setmealId);
+        shoppingCart.setAmount(BigDecimal.valueOf(setmeal.getPrice().doubleValue() / 100));
     }
 }
