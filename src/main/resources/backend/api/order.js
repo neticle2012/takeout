@@ -17,7 +17,7 @@ const queryOrderDetailById = (id) => {
 }
 
 // 取消，派送，完成接口
-const editOrderDetail = (params) => {
+const editOrderDetail = (params) => {//在订单详细管理页面点击派送或者完成时，发送put请求到虚拟路径/order
   return $axios({
     url: '/order',
     method: 'put',

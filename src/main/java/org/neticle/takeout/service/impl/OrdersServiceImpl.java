@@ -1,6 +1,7 @@
 package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -189,5 +190,15 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
                  .orderByDesc(Orders::getOrderTime);
         this.page(ordersPageInfo, lqwOrders);
         return R.success(ordersPageInfo);
+    }
+
+    @Override
+    public R<String> updateOrderStatus(Orders orders) {
+        //UPDATE orders SET status = orders.status WHERE id = orders.id
+        LambdaUpdateWrapper<Orders> luwOrders = new LambdaUpdateWrapper<>();
+        luwOrders.set(Orders::getStatus, orders.getStatus())
+                 .eq(Orders::getId, orders.getId());
+        this.update(luwOrders);
+        return R.success("订单状态修改成功");
     }
 }

@@ -18,4 +18,5 @@ public interface OrdersService extends IService<Orders> {
     R<String> submitOrdersAgain(Orders orders);
     R<Page<Orders>> getOrderDetailPage(int page, int pageSize, String number,
                                        String beginTime, String endTime);
+    R<String> updateOrderStatus(Orders orders);
 }

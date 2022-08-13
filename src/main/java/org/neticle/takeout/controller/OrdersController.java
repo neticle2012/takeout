@@ -52,4 +52,12 @@ public class OrdersController {
                                               String beginTime, String endTime) {
         return ordersService.getOrderDetailPage(page, pageSize, number, beginTime, endTime);
     }
+
+    /**
+     * 后台修改订单状态
+     */
+    @PutMapping
+    public R<String> updateOrderStatus(@RequestBody Orders orders) {
+        return ordersService.updateOrderStatus(orders);
+    }
 }

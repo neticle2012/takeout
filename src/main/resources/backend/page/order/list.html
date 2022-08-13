@@ -237,7 +237,7 @@
                     str =  '待付款'
                 break;
                 case 2:
-                    str =  '正在派送'
+                    str =  '待派送'
                 break;
                 case 3:
                     str =  '已派送'
@@ -259,7 +259,7 @@
             this.diaForm = { ...row }
           },
           // 取消，派送，完成
-          cancelOrDeliveryOrComplete (status, id) {
+          cancelOrDeliveryOrComplete (status, id) {//点击派送或者完成按钮时触发此方法
             this.$confirm('确认更改该订单状态?', '提示', {
                 'confirmButtonText': '确定',
                 'cancelButtonText': '取消',
