@@ -2,6 +2,7 @@ package org.neticle.takeout.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -172,5 +173,21 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders>
         }).collect(Collectors.toList());
         shoppingCartService.saveBatch(shoppingCarts);
         return R.success("操作成功");
+    }
+
+    @Override
+    public R<Page<Orders>> getOrderDetailPage(int page, int pageSize, String number,
+                                              String beginTime, String endTime) {
+        Page<Orders> ordersPageInfo = new Page<>(page, pageSize);
+        //SELECT * FROM orders WHERE number LIKE %number% AND order_time
+        // BETWEEN beginTime AND endTime ORDER BY order_time DESC
+        // LIMIT (page - 1)*pageSize ,pageSize
+        LambdaQueryWrapper<Orders> lqwOrders = new LambdaQueryWrapper<>();
+        lqwOrders.like(number != null, Orders::getNumber, number)
+                 .between(StringUtils.isNotEmpty(beginTime) || StringUtils.isNotEmpty(endTime),
+                         Orders::getOrderTime, beginTime, endTime)
+                 .orderByDesc(Orders::getOrderTime);
+        this.page(ordersPageInfo, lqwOrders);
+        return R.success(ordersPageInfo);
     }
 }

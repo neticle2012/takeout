@@ -43,4 +43,13 @@ public class OrdersController {
     public R<String> submitOrdersAgain(@RequestBody Orders orders) {
         return ordersService.submitOrdersAgain(orders);
     }
+
+    /**
+     * 后台查询订单明细
+     */
+    @GetMapping("/page")
+    public R<Page<Orders>> getOrderDetailPage(int page, int pageSize, String number,
+                                              String beginTime, String endTime) {
+        return ordersService.getOrderDetailPage(page, pageSize, number, beginTime, endTime);
+    }
 }

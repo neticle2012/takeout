@@ -96,7 +96,7 @@
       </el-table>
       <el-pagination
         class="pageList"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="[4, 8, 12, 16]"
         :page-size="pageSize"
         :current-page.sync="page"
         layout="total, sizes, prev, pager, next, jumper"
@@ -190,7 +190,7 @@
              endTime: '',
              counts: 0,
              page: 1,
-             pageSize: 10,
+             pageSize: 4,
              tableData : [],
              dialogVisible: false,
              diaForm: {},
@@ -209,7 +209,7 @@
             }
           }
         },
-        created() {
+        created() {//钩子函数，Vue对象创建时自动调用
           this.init()
         },
         mounted() {

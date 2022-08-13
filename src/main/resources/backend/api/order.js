@@ -1,4 +1,5 @@
 // 查询列表页接口
+//在订单详细管理页面进行分页查询时，发送get请求到虚拟路径/order/page
 const getOrderDetailPage = (params) => {
   return $axios({
     url: '/order/page',
