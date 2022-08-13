@@ -15,6 +15,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
@@ -77,5 +78,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         session.setAttribute("user", user.getId());
         return R.success("登录成功");
+    }
+
+    @Override
+    public R<String> logout(HttpServletRequest request) {
+        //清理Session中保存的当前登录用户的id
+        request.getSession().removeAttribute("user");
+        return R.success("退出成功");
     }
 }

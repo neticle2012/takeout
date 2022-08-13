@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
 
@@ -36,5 +37,13 @@ public class UserController {
     @PostMapping("/login")
     public R<String> login(@RequestBody Map<String,String> map, HttpSession session){
         return userService.login(map, session);
+    }
+
+    /**
+     * 移动端用户退出登录
+     */
+    @PostMapping("/loginout")
+    public R<String> logout(HttpServletRequest request) {
+        return userService.logout(request);
     }
 }

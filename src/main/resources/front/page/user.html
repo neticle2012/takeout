@@ -178,7 +178,7 @@
                         this.$notify({ type:'warning', message:res.msg});
                     }
                 },
-                async toPageLogin(){
+                async toPageLogin(){//点击退出登录按钮触发此方法
                     const res = await loginoutApi()
                     if(res.code === 1){
                         window.requestAnimationFrame(()=>{
