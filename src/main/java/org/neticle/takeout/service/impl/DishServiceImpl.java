@@ -1,6 +1,8 @@
 package org.neticle.takeout.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,11 +17,13 @@ import org.neticle.takeout.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +44,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Autowired
     @Lazy
     private SetmealService setmealService;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 新增菜品，同时插入菜品对应的口味数据
@@ -61,6 +67,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         }).collect(Collectors.toList());
         //保存菜品口味数据到菜品口味表dish_flavor
         dishFlavorService.saveBatch(flavors);
+        deleteFromRedis(dishDto);
         return R.success("新增菜品成功");
     }
 
@@ -93,7 +100,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     }
 
     /**
-     * 根据id查询菜品信息和对应的口味信息
+     * 根据id查询菜品信息和对应的口味信息，该方法只有在修改菜品时被调用
      */
     @Override
     public R<DishDto> getDishWithFlavor(Long id) {
@@ -109,6 +116,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         DishDto dishDto = new DishDto();
         BeanUtils.copyProperties(dish, dishDto);
         dishDto.setFlavors(flavors);
+        //注意：修改菜品时，菜品可能从分类A修改到分类B，因此需要从Redis缓存中同时删除掉分类A和分类B
+        deleteFromRedis(dishDto);
         return R.success(dishDto);
     }
 
@@ -138,6 +147,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             return item;
         }).collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
+        deleteFromRedis(dishDto);
         return R.success("修改菜品成功");
     }
 
@@ -156,10 +166,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
         //如果一个菜品被停售，那么其关联的所有套餐都必须停售
         if (status == 0) {
-            //SELECT setmeal_id FROM setmeal_dish WHERE dish_id in (ids)
-            LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
-            lqwSetmealDish.in(SetmealDish::getDishId, ids)
-                          .select(SetmealDish::getSetmealId);
+            //SELECT DISTINCT setmeal_id FROM setmeal_dish WHERE dish_id in (ids)
+            QueryWrapper<SetmealDish> lqwSetmealDish = new QueryWrapper<>();
+            lqwSetmealDish.select("DISTINCT setmeal_id")
+                          .lambda()
+                          .in(SetmealDish::getDishId, ids);
             List<SetmealDish> setmealDishes = setmealDishService.list(lqwSetmealDish);
             List<Long> setmealIds = setmealDishes.stream()
                                                  .map(SetmealDish::getSetmealId)
@@ -175,6 +186,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
                 setmealService.update(setmeal, luwSetmeal);
             }
         }
+        deleteFromRedis(ids);
         return R.success("售卖状态修改成功");
     }
 
@@ -211,11 +223,20 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         LambdaQueryWrapper<DishFlavor> lqwFlavor = new LambdaQueryWrapper<>();
         lqwFlavor.in(ids != null, DishFlavor::getDishId, ids);
         dishFlavorService.remove(lqwFlavor);
+        deleteFromRedis(ids);
         return R.success("菜品删除成功");
     }
 
     @Override
     public R<List<DishDto>> listDish(Dish dish) {
+        //先从redis中获取缓存数据
+        String key = "dishes_in_category" + dish.getCategoryId();
+        List<DishDto> dishDtos = JSON.parseArray(redisTemplate.opsForValue().get(key), DishDto.class);
+        //如果存在直接返回，无需查询数据库
+        if (dishDtos != null) {
+            return R.success(dishDtos);
+        }
+        //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
         //SELECT * FROM dish WHERE category_id = dish.categoryId AND status = 1
         // ORDER BY sort ASC, update_time DESC
         LambdaQueryWrapper<Dish> lqwDish = new LambdaQueryWrapper<>();
@@ -223,7 +244,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         lqwDish.eq(Dish::getStatus, 1);//要求菜品必须是起售的，禁售菜品不显示
         lqwDish.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
         List<Dish> dishes = this.list(lqwDish);
-        List<DishDto> dishDtos = dishes.stream().map((item) -> {
+        dishDtos = dishes.stream().map((item) -> {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);//将Dish对象的属性都拷贝到DishDto对象中
             //根据菜品id查询对应的口味集合
@@ -235,6 +256,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             dishDto.setFlavors(dishFlavors);
             return dishDto;
         }).collect(Collectors.toList());
+        redisTemplate.opsForValue().set(key, JSON.toJSONString(dishDtos), 60, TimeUnit.MINUTES);
         return R.success(dishDtos);
     }
 
@@ -278,5 +300,27 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         shoppingCart.setImage(dish.getImage());
         shoppingCart.setDishId(dishId);
         shoppingCart.setAmount(BigDecimal.valueOf(dish.getPrice().doubleValue() / 100));
+    }
+
+    /**
+     * 从Redis缓存中删除掉当前菜品对应的分类
+     */
+    private void deleteFromRedis(DishDto dishDto) {
+        redisTemplate.delete("dishes_in_category" + dishDto.getCategoryId());
+    }
+
+    /**
+     * 从Redis缓存中删除掉当前菜品（多个）对应的分类
+     */
+    private void deleteFromRedis(List<Long> ids) {
+        //SELECT DISTINCT category_id FROM dish WHERE id IN (ids)
+        QueryWrapper<Dish> lqwDish = new QueryWrapper<>();
+        lqwDish.select("DISTINCT category_id")
+               .lambda()
+               .in(Dish::getId, ids);
+        List<Dish> dishes = this.list(lqwDish);
+        for (Dish dish : dishes) {
+            redisTemplate.delete("dishes_in_category" + dish.getCategoryId());
+        }
     }
 }

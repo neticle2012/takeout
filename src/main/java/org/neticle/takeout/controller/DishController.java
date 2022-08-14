@@ -38,7 +38,7 @@ public class DishController {
     }
 
     /**
-     * 根据id查询菜品信息和对应的口味信息
+     * 根据id查询菜品信息和对应的口味信息，该方法只有在修改菜品时被调用
      */
     @GetMapping("/{id}")
     public R<DishDto> getDish(@PathVariable("id") Long id){

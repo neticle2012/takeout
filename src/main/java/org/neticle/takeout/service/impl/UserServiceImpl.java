@@ -11,6 +11,7 @@ import org.neticle.takeout.service.UserService;
 import org.neticle.takeout.utils.ValidateCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Faruku123
@@ -31,6 +33,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private String from; //发件人
     @Autowired
     private JavaMailSender javaMailSender;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
 
     @Override
@@ -48,7 +52,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             message.setSubject(subject);
             message.setText(context);
             javaMailSender.send(message);
-            session.setAttribute(mail, code);//将生成的验证码保存到session
+            //将生成的验证码缓存到Redis中，并且设置过期时间 = 5min
+            redisTemplate.opsForValue().set(mail, code, 5, TimeUnit.MINUTES);
             return R.success("验证码发送成功，请及时查看");
         }
         return R.error("验证码发送失败，请重新输入邮箱");
@@ -58,9 +63,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public R<String> login(Map<String, String> map, HttpSession session) {
         log.info("map: {}", map.toString());
         String mail = map.get("phone");//获取邮箱
-        String inputCode = map.get("code");//获取验证码
-        String sessionCode = (String) session.getAttribute(mail);//从session中获取保存的验证码
-        //进行验证码的比对（页面提交的验证码和session中保存的验证码比对）
+        String inputCode = map.get("code");//获取用户输入的验证码
+        //从Redis中获取缓存的验证码
+        String sessionCode = redisTemplate.opsForValue().get(mail);
+        //进行验证码的比对（页面提交的验证码和Redis中缓存的验证码比对）
         if (!(sessionCode != null && sessionCode.equals(inputCode))) {
             return R.error("登录失败，请重新登录！");
         }
@@ -77,6 +83,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             this.save(user);
         }
         session.setAttribute("user", user.getId());
+        //如果用户登录成功，则删除Redis中缓存的验证码
+        redisTemplate.delete(mail);
         return R.success("登录成功");
     }
 
