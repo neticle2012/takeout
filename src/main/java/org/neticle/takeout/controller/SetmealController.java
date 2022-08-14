@@ -39,7 +39,7 @@ public class SetmealController {
     }
 
     /**
-     * 根据id查询套餐信息和对应的菜品信息
+     * 根据id查询套餐信息和对应的菜品信息，该方法只在修改套餐时被调用
      */
     @GetMapping("/{id}")
     public R<SetmealDto> getSetmeal(@PathVariable("id") Long id){

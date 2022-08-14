@@ -19,6 +19,8 @@ import org.neticle.takeout.service.SetmealDishService;
 import org.neticle.takeout.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      */
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache",
+                key = "#root.target.getKeyOfCategoryBySetmeal(#p0)")
     public R<String> saveSetmealWithDish(SetmealDto setmealDto) {
         log.info("套餐信息: {}", setmealDto);
         //保存套餐的基本信息 -> setmeal表INSERT
@@ -90,7 +94,13 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         return R.success(setmealDtoPageInfo);
     }
 
+    /**
+     * 根据id查询套餐信息和对应的菜品信息，该方法只在修改套餐时被调用
+     * 注意：修改套餐时，套餐可能从分类A修改到分类B，因此需要从Redis缓存中同时删除掉分类A和分类B
+     */
     @Override
+    @CacheEvict(value = "setmealCache",
+                key = "#root.target.getKeyOfCategoryBySetmeal(#result.data)")
     public R<SetmealDto> getSetmealWithDish(Long id) {
         //查询套餐基本信息，从setmeal表查询
         Setmeal setmeal = this.getById(id);
@@ -111,6 +121,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      */
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache",
+                key = "#root.target.getKeyOfCategoryBySetmeal(#p0)")
     public R<String> updateSetmealWithDish(SetmealDto setmealDto) {
         Long setmealId = setmealDto.getId();//获取套餐id，为SetmealDish对象的setmealId属性赋值
 
@@ -133,6 +145,10 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
 
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", allEntries = true)
+    //TODO: 使用@CacheEvict注解读取根据ids查到的多个分类，完成批量删除操作，
+    // 可能方案1：@Caching(evict={@CacheEvict(xxx),@CacheEvict(xxx)})使用反射为注解赋值
+    // 可能方案2：自定义RedisCache https://www.h5w3.com/249706.html
     public R<String> updateSetmealStatus(int status, List<Long> ids) {
         log.info("status: {}", status);
         log.info("ids: {}", ids);
@@ -175,6 +191,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      */
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> deleteSetmealWithDish(List<Long> ids) {
         //查询当前套餐集合中是否存在正在起售的套餐，如果存在，则批量删除失败
         //SELECT COUNT(*) FROM setmeal WHERE id IN (ids) AND status = 1
@@ -195,6 +212,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     }
 
     @Override
+    @Cacheable(value = "setmealCache", key = "'setmeals_in_category' + #setmeal.categoryId")
     public R<List<Setmeal>> listSetmeal(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> lqwSetmeal = new LambdaQueryWrapper<>();
         //SELECT * FROM setmeal WHERE category_id = setmeal.categoryId AND status = 1
@@ -239,5 +257,12 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         shoppingCart.setImage(setmeal.getImage());
         shoppingCart.setSetmealId(setmealId);
         shoppingCart.setAmount(BigDecimal.valueOf(setmeal.getPrice().doubleValue() / 100));
+    }
+
+    /**
+     * 得到当前套餐对应分类在缓存中的key
+     */
+    public String getKeyOfCategoryBySetmeal(SetmealDto setmealDto) {
+        return "setmeals_in_category" + setmealDto.getCategoryId();
     }
 }

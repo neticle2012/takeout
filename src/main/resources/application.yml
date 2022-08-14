@@ -1,6 +1,10 @@
 server:
   port: 8080
 spring:
+  cache:
+    type: redis
+    redis:
+      time-to-live: 1800000 #设置缓存数据过期时间，默认单位ms
   redis:
     host: 127.0.0.1
     port: 6379
