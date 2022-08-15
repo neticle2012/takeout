@@ -1,6 +1,36 @@
 server:
   port: 8080
 spring:
+  main:
+    #允许bean定义覆盖，因为目前Sharding-JDBC和Druid的数据源的bean id都是dataSource，前者需要覆盖后者
+    allow-bean-definition-overriding: true
+  shardingsphere:
+    datasource:
+      names: mymaster, myslave #下面配置的所有数据源的名称
+      mymaster: #主库数据源的配置，名称自己定义
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: "jdbc:mysql://192.168.200.130:3306/take_out_db?serverTimezone=Asia/Shanghai&
+              useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&
+              useSSL=false&allowPublicKeyRetrieval=true"
+        username: root_sqlyog
+        password: hspedu100
+      myslave: #从库数据源的配置，名称自己定义
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: "jdbc:mysql://192.168.200.131:3306/take_out_db?serverTimezone=Asia/Shanghai&
+              useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&
+              useSSL=false&allowPublicKeyRetrieval=true"
+        username: root_sqlyog
+        password: hspedu100
+    masterslave: #读写分离配置
+      load-balance-algorithm-type: round_robin #多个从库读操作负载均衡采用轮询
+      name: dataSource #最终的数据源名称（bean的id）
+      master-data-source-name: mymaster #主库数据源名称
+      slave-data-source-names: myslave #从库数据源名称，多个从库使用逗号分割
+    props:
+      sql:
+        show: true #开启sql显示
   cache:
     type: redis
     redis:
@@ -16,14 +46,6 @@ spring:
   application:
     #应用名称
     name: my_take_out
-  datasource:
-    druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: "jdbc:mysql://localhost:3306/take_out_db?serverTimezone=Asia/Shanghai&
-      useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&
-      useSSL=false&allowPublicKeyRetrieval=true"
-      username: root
-      password: hsp
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
