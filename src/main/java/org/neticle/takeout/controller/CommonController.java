@@ -1,5 +1,8 @@
 package org.neticle.takeout.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.R;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +28,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/common")
+@Api(tags = "文件相关接口")
 public class CommonController {
     @Value("${takeout.path}")
     private String basePath;
@@ -34,6 +38,8 @@ public class CommonController {
      *
      * @param file 该参数的名称必须与前端上传文件请求Form Data中的 name 一致（F12查看）
      */
+    @ApiOperation(value = "文件上传接口")
+    @ApiImplicitParam(name = "file", value = "文件对象", required = true)
     @PostMapping("/upload")
     public R<String> upload(MultipartFile file) {
         //file是一个临时文件，需要转存到指定位置，否则本次请求完成后临时文件会被删除
@@ -61,6 +67,8 @@ public class CommonController {
     /**
      * 文件下载
      */
+    @ApiOperation(value = "文件下载接口")
+    @ApiImplicitParam(name = "name", value = "文件名", required = true)
     @GetMapping("/download")
     public void download(String name, HttpServletResponse response) {
         FileInputStream fis = null;

@@ -1,5 +1,8 @@
 package org.neticle.takeout.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.pojo.User;
 import org.neticle.takeout.service.UserService;
@@ -19,6 +22,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/user")
+@Api(tags = "用户相关接口")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -26,6 +30,8 @@ public class UserController {
     /**
      * 发送邮箱验证码
      */
+    @ApiOperation(value = "发送邮箱验证码接口")
+    @ApiImplicitParam(name = "user", value = "用户", required = true)
     @PostMapping("/sendMsg")
     public R<String> sendMsg(@RequestBody User user, HttpSession session){
         return userService.sendMsg(user, session);
@@ -34,6 +40,8 @@ public class UserController {
     /**
      * 移动端用户登录
      */
+    @ApiOperation(value = "用户登录接口")
+    @ApiImplicitParam(name = "map", value = "用户输入邮箱和验证码的Map集合", required = true)
     @PostMapping("/login")
     public R<String> login(@RequestBody Map<String,String> map, HttpSession session){
         return userService.login(map, session);
@@ -42,6 +50,7 @@ public class UserController {
     /**
      * 移动端用户退出登录
      */
+    @ApiOperation(value = "用户退出登录接口")
     @PostMapping("/loginout")
     public R<String> logout(HttpServletRequest request) {
         return userService.logout(request);

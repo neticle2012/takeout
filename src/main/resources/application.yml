@@ -1,6 +1,9 @@
 server:
   port: 8080
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   main:
     #允许bean定义覆盖，因为目前Sharding-JDBC和Druid的数据源的bean id都是dataSource，前者需要覆盖后者
     allow-bean-definition-overriding: true
