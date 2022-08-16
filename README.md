@@ -33,11 +33,11 @@
 项目文件结构：
 
 .
-|-- README.md
-|-- imgs/：菜品/套餐图片资源
-|-- pom.xml
-|-- src/
-|-- takeout.sql：项目数据库备份的SQL文件，在MySQL客户端运行`source takeout.sql`以恢复数据库中的数据
+|-- README.md  
+|-- imgs/：菜品/套餐图片资源  
+|-- pom.xml  
+|-- src/  
+|-- takeout.sql：项目数据库备份的SQL文件，在MySQL客户端运行`source takeout.sql`以恢复数据库中的数据  
 `-- 外卖项目.xmind：项目笔记，其中每节都与git的版本相对应
 
 首先打开`application.yml`文件，修改为自己的配置（MySQL主从库配置、电子邮件配置、Redis配置等），然后启动对应的MySQL、Redis、Nginx服务，再启动项目，
