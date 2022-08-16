@@ -39,9 +39,10 @@ spring:
     redis:
       time-to-live: 1800000 #设置缓存数据过期时间，默认单位ms
   redis:
-    host: 127.0.0.1
+    host: 192.168.200.130
     port: 6379
     database: 0
+    password: hspedu100
   mail:
     username: olgfood_official@163.com
     # password: 
@@ -59,4 +60,4 @@ mybatis-plus:
       id-type: ASSIGN_ID  # 设置统一的主键生成策略
 
 takeout:
-  path: E:\hspeduIOFiles\takeout\ # 设置文件上传后的保存路径
+  path: /usr/local/imgs/ # 设置文件上传后的保存路径
