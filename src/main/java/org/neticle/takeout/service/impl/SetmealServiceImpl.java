@@ -17,6 +17,7 @@ import org.neticle.takeout.service.CategoryService;
 import org.neticle.takeout.service.DishService;
 import org.neticle.takeout.service.SetmealDishService;
 import org.neticle.takeout.service.SetmealService;
+import org.neticle.takeout.utils.RedisCache;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -44,14 +46,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     private CategoryService categoryService;
     @Autowired
     private DishService dishService;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 新增套餐，同时需要保存套餐和菜品的关联关系
      */
     @Override
     @Transactional
-    @CacheEvict(value = "setmealCache",
-                key = "#root.target.getKeyOfCategoryBySetmeal(#p0)")
     public R<String> saveSetmealWithDish(SetmealDto setmealDto) {
         log.info("套餐信息: {}", setmealDto);
         //保存套餐的基本信息 -> setmeal表INSERT
@@ -64,6 +66,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             return item;
         }).collect(Collectors.toList());
         setmealDishService.saveBatch(setmealDishes);
+        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
         return R.success("新增套餐成功");
     }
 
@@ -99,8 +102,6 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      * 注意：修改套餐时，套餐可能从分类A修改到分类B，因此需要从Redis缓存中同时删除掉分类A和分类B
      */
     @Override
-    @CacheEvict(value = "setmealCache",
-                key = "#root.target.getKeyOfCategoryBySetmeal(#result.data)")
     public R<SetmealDto> getSetmealWithDish(Long id) {
         //查询套餐基本信息，从setmeal表查询
         Setmeal setmeal = this.getById(id);
@@ -113,6 +114,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         SetmealDto setmealDto = new SetmealDto();
         BeanUtils.copyProperties(setmeal, setmealDto);
         setmealDto.setSetmealDishes(setmealDishes);
+        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
         return R.success(setmealDto);
     }
 
@@ -121,8 +123,6 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      */
     @Override
     @Transactional
-    @CacheEvict(value = "setmealCache",
-                key = "#root.target.getKeyOfCategoryBySetmeal(#p0)")
     public R<String> updateSetmealWithDish(SetmealDto setmealDto) {
         Long setmealId = setmealDto.getId();//获取套餐id，为SetmealDish对象的setmealId属性赋值
 
@@ -140,15 +140,12 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             return item;
         }).collect(Collectors.toList());
         setmealDishService.saveBatch(setmealDishes);
+        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
         return R.success("修改套餐成功");
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "setmealCache", allEntries = true)
-    //TODO: 使用@CacheEvict注解读取根据ids查到的多个分类，完成批量删除操作，
-    // 可能方案1：@Caching(evict={@CacheEvict(xxx),@CacheEvict(xxx)})使用反射为注解赋值
-    // 可能方案2：自定义RedisCache https://www.h5w3.com/249706.html
     public R<String> updateSetmealStatus(int status, List<Long> ids) {
         log.info("status: {}", status);
         log.info("ids: {}", ids);
@@ -183,6 +180,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
                 dishService.update(dish, luwDish);
             }
         }
+        deleteSetmealsFromRedis(ids);
         return R.success("售卖状态修改成功");
     }
 
@@ -191,7 +189,6 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      */
     @Override
     @Transactional
-    @CacheEvict(value = "setmealCache", allEntries = true)
     public R<String> deleteSetmealWithDish(List<Long> ids) {
         //查询当前套餐集合中是否存在正在起售的套餐，如果存在，则批量删除失败
         //SELECT COUNT(*) FROM setmeal WHERE id IN (ids) AND status = 1
@@ -208,19 +205,28 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         LambdaQueryWrapper<SetmealDish> lqwSetmealDish = new LambdaQueryWrapper<>();
         lqwSetmealDish.in(SetmealDish::getSetmealId, ids);
         setmealDishService.remove(lqwSetmealDish);
+        deleteSetmealsFromRedis(ids);
         return R.success("套餐删除成功");
     }
 
     @Override
-    @Cacheable(value = "setmealCache", key = "'setmeals_in_category' + #setmeal.categoryId")
     public R<List<Setmeal>> listSetmeal(Setmeal setmeal) {
+        //先从redis中获取缓存数据
+        String key = "setmeals_in_category" + setmeal.getCategoryId();
+        List<Setmeal> setmeals = redisCache.getCacheObject(key);
+        //如果存在直接返回，无需查询数据库
+        if (setmeals != null) {
+            return R.success(setmeals);
+        }
+        //如果不存在，需要查询数据库，将查询到的套餐数据缓存到Redis
         LambdaQueryWrapper<Setmeal> lqwSetmeal = new LambdaQueryWrapper<>();
         //SELECT * FROM setmeal WHERE category_id = setmeal.categoryId AND status = 1
         // ORDER BY update_time DESC
         lqwSetmeal.eq(Setmeal::getCategoryId, setmeal.getCategoryId())
                   .eq(Setmeal::getStatus, 1) //要求套餐必须是起售的，禁售套餐不显示
                   .orderByDesc(Setmeal::getUpdateTime);
-        List<Setmeal> setmeals = this.list(lqwSetmeal);
+        setmeals = this.list(lqwSetmeal);
+        redisCache.setCacheObject(key, setmeals, 60, TimeUnit.MINUTES);
         return R.success(setmeals);
     }
 
@@ -260,9 +266,17 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     }
 
     /**
-     * 得到当前套餐对应分类在缓存中的key
+     * 从Redis缓存中删除掉当前套餐（多个）对应的分类
      */
-    public String getKeyOfCategoryBySetmeal(SetmealDto setmealDto) {
-        return "setmeals_in_category" + setmealDto.getCategoryId();
+    private void deleteSetmealsFromRedis(List<Long> ids) {
+        //SELECT DISTINCT category_id FROM setmeal WHERE id IN (ids)
+        QueryWrapper<Setmeal> lqwSetmeal = new QueryWrapper<>();
+        lqwSetmeal.select("DISTINCT category_id")
+               .lambda()
+               .in(Setmeal::getId, ids);
+        List<Setmeal> setmeals = this.list(lqwSetmeal);
+        redisCache.deleteObject(setmeals.stream()
+                .map((setmeal) -> "setmeals_in_category" + setmeal.getCategoryId())
+                .collect(Collectors.toList()));
     }
 }

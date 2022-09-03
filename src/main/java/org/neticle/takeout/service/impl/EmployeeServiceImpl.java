@@ -6,14 +6,22 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.EmployeeDto;
 import org.neticle.takeout.mapper.EmployeeMapper;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
+import org.neticle.takeout.utils.JwtUtil;
+import org.neticle.takeout.utils.RedisCache;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * @author Faruku123
@@ -23,30 +31,28 @@ import java.time.LocalDateTime;
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         implements EmployeeService {
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private RedisCache redisCache;
+
     @Override
-    public R<Employee> login(HttpServletRequest request, Employee employee) {
-        //1、将页面提交的密码进行md5加密处理
-        String password = employee.getPassword();
-        password = DigestUtils.md5DigestAsHex(password.getBytes());
-        //2、根据页面提交的用户名来查数据库，如果没有查询到则返回失败结果
-        // SELECT * FROM employee WHERE username = Employee.username
-        LambdaQueryWrapper<Employee> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Employee::getUsername, employee.getUsername());
-        Employee emp = this.getOne(lqw);
-        if (emp == null) {
-            return R.error("登录失败");
+    public R<EmployeeDto> login(Employee employee) {
+        //1. 使用 AuthenticationManager接口对象的authenticate方法进行登录验证
+        UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(
+                employee.getUsername(), employee.getPassword());
+        Authentication authenticate = authenticationManager.authenticate(upat);
+        if (Objects.isNull(authenticate)) {//校验失败
+            throw new RuntimeException("用户名或密码错误");
         }
-        //3、比对密码，如果不一致则返回失败结果
-        if (!emp.getPassword().equals(password)) {
-            return R.error("登录失败");
-        }
-        //4、查看员工状态，如果已禁用状态，则返回员工已禁用结果
-        if (emp.getStatus() == 0) {
-            return R.error("账号已禁用");
-        }
-        //5、登录成功，将用户id存入Session并返回成功结果
-        request.getSession().setAttribute("employee", emp.getId());
-        return R.success(emp);
+        //2. 自己生成jwt给前端
+        EmployeeDto empDto = (EmployeeDto) authenticate.getPrincipal();
+        String empId = empDto.getEmployee().getId() + "";
+        String jwt = JwtUtil.createJWT(empId);
+        empDto.setToken(jwt);
+        //3. 员工相关所有信息放入redis
+        redisCache.setCacheObject("login:"+ empId, empDto);
+        return R.success(empDto);
     }
 
     @Override

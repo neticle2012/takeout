@@ -8,6 +8,7 @@ import org.neticle.takeout.common.R;
 import org.neticle.takeout.mapper.UserMapper;
 import org.neticle.takeout.pojo.User;
 import org.neticle.takeout.service.UserService;
+import org.neticle.takeout.utils.RedisCache;
 import org.neticle.takeout.utils.ValidateCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,11 +35,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Autowired
     private JavaMailSender javaMailSender;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisCache redisCache;
 
 
     @Override
-    public R<String> sendMsg(User user, HttpSession session) {
+    public R<String> sendMsg(User user) {
         String mail = user.getPhone();//获取邮箱账号
         log.info("user: {}", user.toString());
         String subject = "奥利给皇家餐厅登录验证码";
@@ -53,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             message.setText(context);
             javaMailSender.send(message);
             //将生成的验证码缓存到Redis中，并且设置过期时间 = 5min
-            redisTemplate.opsForValue().set(mail, code, 5, TimeUnit.MINUTES);
+            redisCache.setCacheObject(mail, code, 5, TimeUnit.MINUTES);
             return R.success("验证码发送成功，请及时查看");
         }
         return R.error("验证码发送失败，请重新输入邮箱");
@@ -65,7 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String mail = map.get("phone");//获取邮箱
         String inputCode = map.get("code");//获取用户输入的验证码
         //从Redis中获取缓存的验证码
-        String sessionCode = redisTemplate.opsForValue().get(mail);
+        String sessionCode = redisCache.getCacheObject(mail);
         //进行验证码的比对（页面提交的验证码和Redis中缓存的验证码比对）
         if (!(sessionCode != null && sessionCode.equals(inputCode))) {
             return R.error("登录失败，请重新登录！");
@@ -84,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         session.setAttribute("user", user.getId());
         //如果用户登录成功，则删除Redis中缓存的验证码
-        redisTemplate.delete(mail);
+        redisCache.deleteObject(mail);
         return R.success("登录成功");
     }
 

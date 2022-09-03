@@ -13,7 +13,7 @@ import java.util.Map;
  * @version 1.0
  */
 public interface UserService extends IService<User> {
-    R<String> sendMsg(User user, HttpSession session);
+    R<String> sendMsg(User user);
     R<String> login(Map<String,String> map, HttpSession session);
     R<String> logout(HttpServletRequest request);
 }

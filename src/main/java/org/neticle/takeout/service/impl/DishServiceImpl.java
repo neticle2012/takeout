@@ -14,6 +14,7 @@ import org.neticle.takeout.dto.DishDto;
 import org.neticle.takeout.mapper.DishMapper;
 import org.neticle.takeout.pojo.*;
 import org.neticle.takeout.service.*;
+import org.neticle.takeout.utils.RedisCache;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -45,7 +46,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Lazy
     private SetmealService setmealService;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private RedisCache redisCache;
 
     /**
      * 新增菜品，同时插入菜品对应的口味数据
@@ -67,7 +68,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         }).collect(Collectors.toList());
         //保存菜品口味数据到菜品口味表dish_flavor
         dishFlavorService.saveBatch(flavors);
-        deleteFromRedis(dishDto);
+        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
         return R.success("新增菜品成功");
     }
 
@@ -117,7 +118,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         BeanUtils.copyProperties(dish, dishDto);
         dishDto.setFlavors(flavors);
         //注意：修改菜品时，菜品可能从分类A修改到分类B，因此需要从Redis缓存中同时删除掉分类A和分类B
-        deleteFromRedis(dishDto);
+        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
         return R.success(dishDto);
     }
 
@@ -147,7 +148,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             return item;
         }).collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
-        deleteFromRedis(dishDto);
+        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
         return R.success("修改菜品成功");
     }
 
@@ -186,7 +187,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
                 setmealService.update(setmeal, luwSetmeal);
             }
         }
-        deleteFromRedis(ids);
+        deleteDishesFromRedis(ids);
         return R.success("售卖状态修改成功");
     }
 
@@ -223,7 +224,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         LambdaQueryWrapper<DishFlavor> lqwFlavor = new LambdaQueryWrapper<>();
         lqwFlavor.in(ids != null, DishFlavor::getDishId, ids);
         dishFlavorService.remove(lqwFlavor);
-        deleteFromRedis(ids);
+        deleteDishesFromRedis(ids);
         return R.success("菜品删除成功");
     }
 
@@ -231,7 +232,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     public R<List<DishDto>> listDish(Dish dish) {
         //先从redis中获取缓存数据
         String key = "dishes_in_category" + dish.getCategoryId();
-        List<DishDto> dishDtos = JSON.parseArray(redisTemplate.opsForValue().get(key), DishDto.class);
+        List<DishDto> dishDtos = redisCache.getCacheObject(key);
         //如果存在直接返回，无需查询数据库
         if (dishDtos != null) {
             return R.success(dishDtos);
@@ -256,7 +257,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             dishDto.setFlavors(dishFlavors);
             return dishDto;
         }).collect(Collectors.toList());
-        redisTemplate.opsForValue().set(key, JSON.toJSONString(dishDtos), 60, TimeUnit.MINUTES);
+        redisCache.setCacheObject(key, dishDtos, 60, TimeUnit.MINUTES);
         return R.success(dishDtos);
     }
 
@@ -303,24 +304,17 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     }
 
     /**
-     * 从Redis缓存中删除掉当前菜品对应的分类
-     */
-    private void deleteFromRedis(DishDto dishDto) {
-        redisTemplate.delete("dishes_in_category" + dishDto.getCategoryId());
-    }
-
-    /**
      * 从Redis缓存中删除掉当前菜品（多个）对应的分类
      */
-    private void deleteFromRedis(List<Long> ids) {
+    private void deleteDishesFromRedis(List<Long> ids) {
         //SELECT DISTINCT category_id FROM dish WHERE id IN (ids)
         QueryWrapper<Dish> lqwDish = new QueryWrapper<>();
         lqwDish.select("DISTINCT category_id")
                .lambda()
                .in(Dish::getId, ids);
         List<Dish> dishes = this.list(lqwDish);
-        for (Dish dish : dishes) {
-            redisTemplate.delete("dishes_in_category" + dish.getCategoryId());
-        }
+        redisCache.deleteObject(dishes.stream()
+                .map((dish) -> "dishes_in_category" + dish.getCategoryId())
+                .collect(Collectors.toList()));
     }
 }

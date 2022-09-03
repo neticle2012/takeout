@@ -188,6 +188,7 @@
               if(res.code === 1){
                 //移除掉浏览器的localStorage中为userInfo的key对应的value，并跳转回后台登录界面
                 localStorage.removeItem('userInfo')
+                localStorage.removeItem('token')
                 window.location.href = '/backend/page/login/login.html'
               }
             })

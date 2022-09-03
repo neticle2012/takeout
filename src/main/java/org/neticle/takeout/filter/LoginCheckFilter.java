@@ -18,7 +18,7 @@ import java.io.IOException;
  * 检查用户是否已经完成登录
  */
 @Slf4j
-@WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
+//@WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
 public class LoginCheckFilter implements Filter {
     //路径匹配器，支持通配符
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
@@ -56,7 +56,7 @@ public class LoginCheckFilter implements Filter {
         Long empId = null;
         if ((empId = (Long) request.getSession().getAttribute("employee")) != null){
             log.info("后台用户已登录，用户id为: {}", empId);
-            BaseContext.setCurrentId(empId);
+            BaseContext.setCurrentId(empId);//为当前请求对应的线程设置线程内共享empId
             log.info("线程id = {}", Thread.currentThread().getId());
             filterChain.doFilter(request, response);
             return;
@@ -65,7 +65,7 @@ public class LoginCheckFilter implements Filter {
         Long userId = null;
         if ((userId = (Long) request.getSession().getAttribute("user")) != null){
             log.info("前台用户已登录，用户id为: {}", userId);
-            BaseContext.setCurrentId(userId);
+            BaseContext.setCurrentId(userId);//为当前请求对应的线程设置线程内共享userId
             log.info("线程id = {}", Thread.currentThread().getId());
             filterChain.doFilter(request, response);
             return;

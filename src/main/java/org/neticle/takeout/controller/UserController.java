@@ -33,8 +33,8 @@ public class UserController {
     @ApiOperation(value = "发送邮箱验证码接口")
     @ApiImplicitParam(name = "user", value = "用户", required = true)
     @PostMapping("/sendMsg")
-    public R<String> sendMsg(@RequestBody User user, HttpSession session){
-        return userService.sendMsg(user, session);
+    public R<String> sendMsg(@RequestBody User user){
+        return userService.sendMsg(user);
     }
 
     /**

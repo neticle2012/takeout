@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.dto.EmployeeDto;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class EmployeeController {
     @ApiOperation(value = "员工登录接口")
     @ApiImplicitParam(name = "employee", value = "员工", required = true)
     @PostMapping("/login")
-    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
-        return employeeService.login(request, employee);
+    public R<EmployeeDto> login(@RequestBody Employee employee){
+        return employeeService.login(employee);
     }
 
     /**

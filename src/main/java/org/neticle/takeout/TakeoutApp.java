@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ServletComponentScan
 @EnableTransactionManagement
-@EnableCaching //开启缓存功能
 public class TakeoutApp {
     public static void main(String[] args) {
         SpringApplication.run(TakeoutApp.class, args);

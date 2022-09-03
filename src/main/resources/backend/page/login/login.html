@@ -102,9 +102,12 @@
               let res = await loginApi(this.loginForm)
               //为什么不是res.data.code? 因为前端拦截器返回的是res.data！
               if (String(res.code) === '1') {// 1表示登录成功
-                //以userInfo为key，返回data转成的json对象为value，存储到浏览器中
+                //后端返回的是EmployeeDto对象
+                //以userInfo为key，employee属性转成的json对象为value，存储到浏览器中
+                //以token为key，token属性转成的json对象为value，存储到浏览器中
                 //可以通过浏览器F12选择application进行查看
-                localStorage.setItem('userInfo',JSON.stringify(res.data))
+                localStorage.setItem('userInfo',JSON.stringify(res.data.employee))
+                localStorage.setItem('token',JSON.stringify(res.data.token))
                 window.location.href= '/backend/index.html'
               } else {
                 this.$message.error(res.msg)

@@ -34,10 +34,6 @@ spring:
     props:
       sql:
         show: true #开启sql显示
-  cache:
-    type: redis
-    redis:
-      time-to-live: 1800000 #设置缓存数据过期时间，默认单位ms
   redis:
     host: 192.168.200.130
     port: 6379
@@ -45,7 +41,7 @@ spring:
     password: hspedu100
   mail:
     username: olgfood_official@163.com
-    # password: 
+    # password:
     host: smtp.163.com
   application:
     #应用名称
