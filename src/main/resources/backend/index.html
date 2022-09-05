@@ -81,7 +81,7 @@
               <span>{{headTitle}}</span>
             </div>
             <div class="right-menu">
-              <div class="avatar-wrapper">{{ userInfo.name }}</div>
+              <div class="avatar-wrapper">{{ empInfo.empName }}</div>
               <!-- <div class="logout" @click="logout">退出</div> -->
               <img src="images/icons/btn_close@2x.png" class="outLogin" alt="退出" @click="logout" />
             </div>
@@ -119,7 +119,7 @@
           return {
             defAct: '2',
             menuActived: '2',
-            userInfo: {},
+            empInfo: {},
             menuList: [
               // {
               //   id: '1',
@@ -168,10 +168,10 @@
         computed: {},
         created() {
           //钩子函数，在Vue对象创建时就执行
-          //取出浏览器的localStorage中为userInfo的key对应的value
-          const userInfo = window.localStorage.getItem('userInfo')
-          if (userInfo) {
-            this.userInfo = JSON.parse(userInfo)
+          //取出浏览器的localStorage中为empInfo的key对应的value
+          const empInfo = window.localStorage.getItem('empInfo')
+          if (empInfo) {
+            this.empInfo = JSON.parse(empInfo)
           }
           this.closeLoading()
         },
@@ -186,8 +186,8 @@
           logout() {//点击退出按钮后执行的方法
             logoutApi().then((res)=>{
               if(res.code === 1){
-                //移除掉浏览器的localStorage中为userInfo的key对应的value，并跳转回后台登录界面
-                localStorage.removeItem('userInfo')
+                //移除掉浏览器的localStorage中为empInfo、token的key对应的value，并跳转回后台登录界面
+                localStorage.removeItem('empInfo')
                 localStorage.removeItem('token')
                 window.location.href = '/backend/page/login/login.html'
               }

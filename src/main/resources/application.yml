@@ -57,3 +57,8 @@ mybatis-plus:
 
 takeout:
   path: /usr/local/imgs/ # 设置文件上传后的保存路径
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        security: debug # 开启spring security的日志

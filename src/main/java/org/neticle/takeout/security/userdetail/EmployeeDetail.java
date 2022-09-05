@@ -1,4 +1,4 @@
-package org.neticle.takeout.dto;
+package org.neticle.takeout.security.userdetail;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,12 +13,12 @@ import java.util.Collection;
 /**
  * @author Faruku123
  * @version 1.0
+ * UserDetails对于员工的实现子类，封装了从数据库中查询到的员工的各种信息
  */
 @Data
-@Component
-public class EmployeeDto implements UserDetails {
+@AllArgsConstructor
+public class EmployeeDetail implements UserDetails {
     private Employee employee;
-    private String token;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -35,22 +35,22 @@ public class EmployeeDto implements UserDetails {
         return employee.getUsername();
     }
 
-    @Override
+    @Override //账号是否过期
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @Override
+    @Override //账号是否被锁定
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @Override
+    @Override //密码是否过期
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    @Override
+    @Override //账号是否被禁用
     public boolean isEnabled() {
         return employee.getStatus() != 0;
     }

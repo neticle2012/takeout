@@ -6,21 +6,21 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.neticle.takeout.common.R;
-import org.neticle.takeout.dto.EmployeeDto;
+import org.neticle.takeout.security.userdetail.EmployeeDetail;
 import org.neticle.takeout.mapper.EmployeeMapper;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
-import org.neticle.takeout.utils.JwtUtil;
 import org.neticle.takeout.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -31,42 +31,11 @@ import java.util.Objects;
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         implements EmployeeService {
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private RedisCache redisCache;
-
-    @Override
-    public R<EmployeeDto> login(Employee employee) {
-        //1. 使用 AuthenticationManager接口对象的authenticate方法进行登录验证
-        UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(
-                employee.getUsername(), employee.getPassword());
-        Authentication authenticate = authenticationManager.authenticate(upat);
-        if (Objects.isNull(authenticate)) {//校验失败
-            throw new RuntimeException("用户名或密码错误");
-        }
-        //2. 自己生成jwt给前端
-        EmployeeDto empDto = (EmployeeDto) authenticate.getPrincipal();
-        String empId = empDto.getEmployee().getId() + "";
-        String jwt = JwtUtil.createJWT(empId);
-        empDto.setToken(jwt);
-        //3. 员工相关所有信息放入redis
-        redisCache.setCacheObject("login:"+ empId, empDto);
-        return R.success(empDto);
-    }
-
-    @Override
-    public R<String> logout(HttpServletRequest request) {
-        //清理Session中保存的当前登录员工的id
-        request.getSession().removeAttribute("employee");
-        return R.success("退出成功");
-    }
-
     @Override
     public R<String> saveEmp(HttpServletRequest request, Employee employee) {
         log.info("新增员工，员工信息: {}", employee.toString());
-        //设置初始密码123456，需要进行md5加密处理
-        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+        //设置初始密码123456，需要进行加盐加密处理
+        employee.setPassword(new BCryptPasswordEncoder().encode("123456"));
         this.save(employee);
         return R.success("新增员工成功");
     }
@@ -99,6 +68,8 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     @Override
     public R<Employee> getByEmpId(Long id) {
         log.info("根据id查询员工信息...");
+        boolean flag = SecurityContextHolder.getContext().getAuthentication() != null;
+        log.info("测试authentication是否存在于SecurityContextHolder中[{}]", flag);
         Employee employee = this.getById(id);
         if (employee != null) {
             return R.success(employee);

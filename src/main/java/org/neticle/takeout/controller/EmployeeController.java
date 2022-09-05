@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.neticle.takeout.common.R;
-import org.neticle.takeout.dto.EmployeeDto;
+import org.neticle.takeout.security.userdetail.EmployeeDetail;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
-
-    /**
-     * 员工登录
-     */
-    @ApiOperation(value = "员工登录接口")
-    @ApiImplicitParam(name = "employee", value = "员工", required = true)
-    @PostMapping("/login")
-    public R<EmployeeDto> login(@RequestBody Employee employee){
-        return employeeService.login(employee);
-    }
-
-    /**
-     * 员工退出
-     */
-    @ApiOperation(value = "员工退出接口")
-    @PostMapping("/logout")
-    public R<String> logout(HttpServletRequest request){
-        return employeeService.logout(request);
-    }
 
     /**
      * 新增员工

@@ -75,7 +75,7 @@
               size="small"
               class="blueBug"
               @click="addMemberHandle(scope.row.id)"
-              :class="{notAdmin:user !== 'admin'}"
+              :class="{notAdmin:empUsername !== 'admin'}"
             >
               编辑
             </el-button>
@@ -84,7 +84,7 @@
               size="small"
               class="delBut non"
               @click="statusHandle(scope.row)"
-              v-if="user === 'admin'"
+              v-if="empUsername === 'admin'"
             >
               <!--判断模型数据user的值是否为admin，如果是则展示当前按钮，否则不展示-->
               {{ scope.row.status == '1' ? '禁用' : '启用' }}
@@ -130,7 +130,7 @@
         created() {//钩子函数，Vue对象创建后调用
           this.init()
           //获取当前登录员工的账号，并赋值给模型数据user
-          this.user = JSON.parse(localStorage.getItem('userInfo')).username
+          this.empUsername = JSON.parse(localStorage.getItem('empInfo')).empUsername
         },
         mounted() {
         },
