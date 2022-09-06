@@ -11,9 +11,9 @@
   service.interceptors.request.use(config => {
     // 让每个请求携带自定义token 请根据实际情况自行修改
     const isToken = (config.headers || {}).isToken === false
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('backend_token')
     if (token && !isToken) {
-      config.headers['authorization'] = token
+      config.headers['authorization'] = 'backend ' + token
     }
     // get请求映射params参数，将params参数以?param1=val1&param2=val2...拼接到url后面
     if (config.method === 'get' && config.params) {
@@ -49,14 +49,14 @@
       if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {
         console.log('---/backend/page/login/login.html---')
         localStorage.removeItem('empInfo')
-        localStorage.removeItem('token')
+        localStorage.removeItem('backend_token')
         window.top.location.href = '/backend/page/login/login.html'
       } else {
         //如果后端返回来的响应中有token
-        //以token为key，token属性转成的json对象为value，存储到浏览器中
+        //以backend_token为key，token转成的json对象为value，存储到浏览器中
         const token = res.headers['authorization']
         if (token) {
-          localStorage.setItem('token', token)
+          localStorage.setItem('backend_token', token)
         }
         return res.data //注意！！！这里前端拦截器放行后直接返回的res.data！！！
       }

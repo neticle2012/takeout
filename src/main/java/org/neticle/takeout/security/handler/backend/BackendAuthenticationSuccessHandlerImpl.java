@@ -1,12 +1,10 @@
-package org.neticle.takeout.security.handler;
+package org.neticle.takeout.security.handler.backend;
 
 import com.alibaba.fastjson.JSON;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.common.R;
 import org.neticle.takeout.pojo.EmpInfo;
-import org.neticle.takeout.pojo.Employee;
-import org.neticle.takeout.security.userdetail.EmployeeDetail;
+import org.neticle.takeout.security.userdetail.backend.EmployeeDetailImpl;
 import org.neticle.takeout.utils.JwtUtil;
 import org.neticle.takeout.utils.RedisCache;
 import org.neticle.takeout.utils.WebUtils;
@@ -36,7 +34,7 @@ public class BackendAuthenticationSuccessHandlerImpl implements AuthenticationSu
                                         HttpServletResponse response,
                                         Authentication authentication)
             throws IOException, ServletException {
-        EmployeeDetail empDetail = (EmployeeDetail) authentication.getPrincipal();
+        EmployeeDetailImpl empDetail = (EmployeeDetailImpl) authentication.getPrincipal();
         //1. 自己生成jwt，放入响应的header中返给前端
         String empId = empDetail.getEmployee().getId() + "";
         String empUsername = empDetail.getEmployee().getUsername();//获取用户名（登录时输入的）
@@ -46,9 +44,9 @@ public class BackendAuthenticationSuccessHandlerImpl implements AuthenticationSu
         //Content-Length、Content-Type、Expires、Last-Modified、Pragma
         response.setHeader("Access-Control-Expose-Headers", "authorization");
         response.setHeader("authorization", jwt);
-        log.info("{} 登录成功，返回jwt给前端", empUsername);
+        log.info("{} 登录成功[后台]，返回jwt给前端", empUsername);
         //2. 员工相关所有信息放入redis
-        redisCache.setCacheObject("login:"+ empId, empDetail);
+        redisCache.setCacheObject("login:backend:"+ empId, empDetail);
         EmpInfo empInfo = new EmpInfo(empUsername, empName);
         WebUtils.renderString(response, JSON.toJSONString(R.success(empInfo)));
     }

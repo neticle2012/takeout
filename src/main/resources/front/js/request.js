@@ -9,11 +9,12 @@
   })
   // request拦截器
   service.interceptors.request.use(config => {
-    // 是否需要设置 token
-    // const isToken = (config.headers || {}).isToken === false
-    // if (getToken() && !isToken) {
-    //   config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-    // }
+    // 让每个请求携带自定义token 请根据实际情况自行修改
+    const isToken = (config.headers || {}).isToken === false
+    const token = localStorage.getItem('front_token')
+    if (token && !isToken) {
+      config.headers['authorization'] = 'front ' + token
+    }
     // get请求映射params参数
     if (config.method === 'get' && config.params) {
       let url = config.url + '?';
@@ -45,8 +46,15 @@
   service.interceptors.response.use(res => {
       console.log('---响应拦截器---',res)
       if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
+        localStorage.removeItem('front_token')
         window.top.location.href = '/front/page/login.html'
       } else {
+        //如果后端返回来的响应中有token
+        //以front_token为key，token转成的json对象为value，存储到浏览器中
+        const token = res.headers['authorization']
+        if (token) {
+          localStorage.setItem('front_token', token)
+        }
         return res.data
       }
     },

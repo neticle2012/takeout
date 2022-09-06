@@ -1,4 +1,4 @@
-package org.neticle.takeout.security.filter;
+package org.neticle.takeout.security.filter.front;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -14,15 +14,15 @@ import java.io.IOException;
 /**
  * @author Faruku123
  * @version 1.0
- * 后台员工注销登录Filter
+ * 前台用户注销登录Filter
  */
 @Slf4j
-public class EmpLogoutFilter extends LogoutFilter {
-    public EmpLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
+public class UserLogoutFilter extends LogoutFilter {
+    public UserLogoutFilter(LogoutSuccessHandler logoutSuccessHandler, LogoutHandler... handlers) {
         super(logoutSuccessHandler, handlers);
     }
 
-    public EmpLogoutFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
+    public UserLogoutFilter(String logoutSuccessUrl, LogoutHandler... handlers) {
         super(logoutSuccessUrl, handlers);
     }
 

@@ -1,7 +1,9 @@
-package org.neticle.takeout.security.handler;
+package org.neticle.takeout.security.handler.front;
 
 import com.alibaba.fastjson.JSON;
 import org.neticle.takeout.common.R;
+import org.neticle.takeout.security.exception.BadCodeException;
+import org.neticle.takeout.security.exception.CodeExpireException;
 import org.neticle.takeout.utils.WebUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -18,24 +20,24 @@ import java.io.IOException;
 /**
  * @author Faruku123
  * @version 1.0
- * 自定义后台登录失败处理
+ * 自定义前台登录失败处理
  */
 @Component
-public class BackendAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
+public class FrontAuthenticationFailureHandlerImpl implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
                                         AuthenticationException exception)
             throws IOException, ServletException {
-        //用户不存在时，抛出UsernameNotFoundException
-        //密码错误时，抛出BadCredentialsException
+        //验证码过期时，抛出CodeExpireException
+        //验证码错误时，抛出BadCodeException
         //用户被禁用时，抛出DisabledException，这三种异常都是AuthenticationException的子类
-        //UsernameNotFoundException是从EmployeeDetailServiceImpl类中抛出来的
-        //BadCredentialsException和DisabledException是在自定义的BackendDaoAuthentationProvider类
-        // 调用其父类DaoAuthenticationProvider等的authenticate方法去进行用户信息的验证时抛出来的
-        if (exception instanceof UsernameNotFoundException ||
-                exception instanceof BadCredentialsException) {
-            WebUtils.renderString(response, JSON.toJSONString(R.error("登录失败，用户名或密码错误！")));
+        //它们都是在调用自定义的FrontCodeAuthentationProvider类的authenticate方法
+        // 去进行用户信息的验证时抛出来的
+        if (exception instanceof CodeExpireException) {
+            WebUtils.renderString(response, JSON.toJSONString(R.error("验证码已过期！")));
+        } else if (exception instanceof BadCodeException) {
+            WebUtils.renderString(response, JSON.toJSONString(R.error("验证码输入有误！")));
         } else if (exception instanceof DisabledException) {
             WebUtils.renderString(response, JSON.toJSONString(R.error("账号已禁用！")));
         } else {

@@ -14,6 +14,4 @@ import java.util.Map;
  */
 public interface UserService extends IService<User> {
     R<String> sendMsg(User user);
-    R<String> login(Map<String,String> map, HttpSession session);
-    R<String> logout(HttpServletRequest request);
 }

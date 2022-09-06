@@ -186,9 +186,9 @@
           logout() {//点击退出按钮后执行的方法
             logoutApi().then((res)=>{
               if(res.code === 1){
-                //移除掉浏览器的localStorage中为empInfo、token的key对应的value，并跳转回后台登录界面
+                //移除掉浏览器的localStorage中为empInfo、backend_token的key对应的value，并跳转回后台登录界面
                 localStorage.removeItem('empInfo')
-                localStorage.removeItem('token')
+                localStorage.removeItem('backend_token')
                 window.location.href = '/backend/page/login/login.html'
               }
             })

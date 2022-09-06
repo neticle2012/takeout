@@ -3,7 +3,6 @@ package org.neticle.takeout.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.neticle.takeout.common.R;
-import org.neticle.takeout.security.userdetail.EmployeeDetail;
 import org.neticle.takeout.pojo.Employee;
 
 import javax.servlet.http.HttpServletRequest;

@@ -36,23 +36,4 @@ public class UserController {
     public R<String> sendMsg(@RequestBody User user){
         return userService.sendMsg(user);
     }
-
-    /**
-     * 移动端用户登录
-     */
-    @ApiOperation(value = "用户登录接口")
-    @ApiImplicitParam(name = "map", value = "用户输入邮箱和验证码的Map集合", required = true)
-    @PostMapping("/login")
-    public R<String> login(@RequestBody Map<String,String> map, HttpSession session){
-        return userService.login(map, session);
-    }
-
-    /**
-     * 移动端用户退出登录
-     */
-    @ApiOperation(value = "用户退出登录接口")
-    @PostMapping("/loginout")
-    public R<String> logout(HttpServletRequest request) {
-        return userService.logout(request);
-    }
 }

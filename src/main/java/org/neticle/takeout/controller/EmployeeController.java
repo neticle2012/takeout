@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.neticle.takeout.common.R;
-import org.neticle.takeout.security.userdetail.EmployeeDetail;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;

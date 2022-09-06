@@ -1,4 +1,4 @@
-package org.neticle.takeout.security.authentication;
+package org.neticle.takeout.security.authentication.backend;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

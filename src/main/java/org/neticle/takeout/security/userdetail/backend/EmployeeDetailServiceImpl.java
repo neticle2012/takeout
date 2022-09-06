@@ -1,11 +1,10 @@
-package org.neticle.takeout.security.userdetail;
+package org.neticle.takeout.security.userdetail.backend;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.neticle.takeout.pojo.Employee;
 import org.neticle.takeout.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,6 +36,6 @@ public class EmployeeDetailServiceImpl implements UserDetailsService {
         }
         //TODO 2.查询权限信息
         //3. 返回UserDetails的实现子类
-        return new EmployeeDetail(emp);
+        return new EmployeeDetailImpl(emp);
     }
 }

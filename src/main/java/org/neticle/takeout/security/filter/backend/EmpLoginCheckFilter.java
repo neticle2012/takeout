@@ -1,16 +1,13 @@
-package org.neticle.takeout.security.filter;
+package org.neticle.takeout.security.filter.backend;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.neticle.takeout.security.authentication.BackendUsernamePasswordAuthenticationToken;
+import org.neticle.takeout.security.authentication.backend.BackendUsernamePasswordAuthenticationToken;
 import org.neticle.takeout.utils.GetRequestJsonUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

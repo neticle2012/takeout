@@ -181,6 +181,8 @@
                 async toPageLogin(){//点击退出登录按钮触发此方法
                     const res = await loginoutApi()
                     if(res.code === 1){
+                        //移除掉浏览器的localStorage中为front_token的key对应的value，并跳转回前台登录界面
+                        localStorage.removeItem('front_token')
                         window.requestAnimationFrame(()=>{
                             window.location.href = '/front/page/login.html'
                         }) 
