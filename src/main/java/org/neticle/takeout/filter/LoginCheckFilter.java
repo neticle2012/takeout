@@ -17,6 +17,7 @@ import java.io.IOException;
  * @version 1.0
  * 检查用户是否已经完成登录
  */
+@Deprecated
 @Slf4j
 //@WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
 public class LoginCheckFilter implements Filter {

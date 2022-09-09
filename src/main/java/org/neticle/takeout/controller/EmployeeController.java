@@ -25,6 +25,27 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     /**
+     * 员工登录
+     */
+    @Deprecated
+    @ApiOperation(value = "员工登录接口")
+    @ApiImplicitParam(name = "employee", value = "员工", required = true)
+    @PostMapping("/login")
+    public R<Employee> login(HttpServletRequest request, @RequestBody Employee employee){
+        return employeeService.login(request, employee);
+    }
+
+    /**
+     * 员工退出
+     */
+    @Deprecated
+    @ApiOperation(value = "员工退出接口")
+    @PostMapping("/logout")
+    public R<String> logout(HttpServletRequest request){
+        return employeeService.logout(request);
+    }
+
+    /**
      * 新增员工
      */
     @ApiOperation(value = "新增员工接口")

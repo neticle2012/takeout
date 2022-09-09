@@ -9,8 +9,10 @@
 - 前端
     - Vue
     - Element-UI
+    - Axios
 - 后端
     - SpringBoot 2.7.2
+    - SpringSecurity 2.7.2  
     - MyBatisPlus 3.5.1
     - MySQL 5.7
     - Redis 5.0.9
@@ -27,12 +29,13 @@
 - 前台减少购物车、点击套餐图片显示套餐中的具体菜品
 - 前台用户查看自己的订单、再来一单、退出登录
 - 后台按条件查看和展示客户订单、修改订单状态
+- 将前后台登录验证改为SpringSecurity+JWT
 
 ## 项目说明
 
 项目文件结构：
 
-.
+.  
 |-- README.md  
 |-- imgs/：菜品/套餐图片资源  
 |-- pom.xml  
@@ -44,4 +47,6 @@
 
 - 前台登录浏览器访问 http://localhost:8080/front/page/login.html
 - 后台登录浏览器访问 http://localhost:8080/backend/page/login/login.html
+  - 所有员工的密码都是123456
+- swagger接口文档访问 http://localhost:8080/doc.html
 

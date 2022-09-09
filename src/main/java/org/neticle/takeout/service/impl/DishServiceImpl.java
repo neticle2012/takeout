@@ -68,7 +68,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         }).collect(Collectors.toList());
         //保存菜品口味数据到菜品口味表dish_flavor
         dishFlavorService.saveBatch(flavors);
-        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
+        redisCache.deleteObject("dishes:category" + dishDto.getCategoryId());
         return R.success("新增菜品成功");
     }
 
@@ -118,7 +118,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         BeanUtils.copyProperties(dish, dishDto);
         dishDto.setFlavors(flavors);
         //注意：修改菜品时，菜品可能从分类A修改到分类B，因此需要从Redis缓存中同时删除掉分类A和分类B
-        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
+        redisCache.deleteObject("dishes:category" + dishDto.getCategoryId());
         return R.success(dishDto);
     }
 
@@ -148,7 +148,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             return item;
         }).collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
-        redisCache.deleteObject("dishes_in_category" + dishDto.getCategoryId());
+        redisCache.deleteObject("dishes:category" + dishDto.getCategoryId());
         return R.success("修改菜品成功");
     }
 
@@ -231,7 +231,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Override
     public R<List<DishDto>> listDish(Dish dish) {
         //先从redis中获取缓存数据
-        String key = "dishes_in_category" + dish.getCategoryId();
+        String key = "dishes:category" + dish.getCategoryId();
         List<DishDto> dishDtos = redisCache.getCacheObject(key);
         //如果存在直接返回，无需查询数据库
         if (dishDtos != null) {
@@ -314,7 +314,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
                .in(Dish::getId, ids);
         List<Dish> dishes = this.list(lqwDish);
         redisCache.deleteObject(dishes.stream()
-                .map((dish) -> "dishes_in_category" + dish.getCategoryId())
+                .map((dish) -> "dishes:category" + dish.getCategoryId())
                 .collect(Collectors.toList()));
     }
 }

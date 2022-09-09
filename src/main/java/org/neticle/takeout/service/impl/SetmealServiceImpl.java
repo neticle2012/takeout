@@ -66,7 +66,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             return item;
         }).collect(Collectors.toList());
         setmealDishService.saveBatch(setmealDishes);
-        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
+        redisCache.deleteObject("setmeals:category" + setmealDto.getCategoryId());
         return R.success("新增套餐成功");
     }
 
@@ -114,7 +114,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         SetmealDto setmealDto = new SetmealDto();
         BeanUtils.copyProperties(setmeal, setmealDto);
         setmealDto.setSetmealDishes(setmealDishes);
-        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
+        redisCache.deleteObject("setmeals:category" + setmealDto.getCategoryId());
         return R.success(setmealDto);
     }
 
@@ -140,7 +140,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             return item;
         }).collect(Collectors.toList());
         setmealDishService.saveBatch(setmealDishes);
-        redisCache.deleteObject("setmeals_in_category" + setmealDto.getCategoryId());
+        redisCache.deleteObject("setmeals:category" + setmealDto.getCategoryId());
         return R.success("修改套餐成功");
     }
 
@@ -212,7 +212,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     @Override
     public R<List<Setmeal>> listSetmeal(Setmeal setmeal) {
         //先从redis中获取缓存数据
-        String key = "setmeals_in_category" + setmeal.getCategoryId();
+        String key = "setmeals:category" + setmeal.getCategoryId();
         List<Setmeal> setmeals = redisCache.getCacheObject(key);
         //如果存在直接返回，无需查询数据库
         if (setmeals != null) {
@@ -276,7 +276,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
                .in(Setmeal::getId, ids);
         List<Setmeal> setmeals = this.list(lqwSetmeal);
         redisCache.deleteObject(setmeals.stream()
-                .map((setmeal) -> "setmeals_in_category" + setmeal.getCategoryId())
+                .map((setmeal) -> "setmeals:category" + setmeal.getCategoryId())
                 .collect(Collectors.toList()));
     }
 }

@@ -12,6 +12,10 @@ import javax.servlet.http.HttpServletRequest;
  * @version 1.0
  */
 public interface EmployeeService extends IService<Employee> {
+    @Deprecated
+    R<Employee> login(HttpServletRequest request, Employee employee);
+    @Deprecated
+    R<String> logout(HttpServletRequest request);
     R<String> saveEmp(HttpServletRequest request, Employee employee);
     R<Page<Employee>> getPage(int page, int pageSize, String name);
     R<String> updateEmp(HttpServletRequest request, Employee employee);
