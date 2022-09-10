@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("all")
 @Component
 public class RedisCache {
+    //TODO 因为主从故障切换而产生的异常该如何处理？
     @Autowired
     public RedisTemplate redisTemplate;
 
